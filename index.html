@@ -4,65 +4,483 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Un pequeño universo para ti 💜</title>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#020004;color:#fff;font-family:Arial,Helvetica,sans-serif}
-#canvas{position:fixed;inset:0;width:100%;height:100%;display:block;opacity:0;visibility:hidden;transition:opacity .8s;z-index:1}
-#canvas.visible{opacity:1;visibility:visible}
-#intro,#welcome{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center}
-#intro{z-index:3000;background:radial-gradient(circle,#180625 0%,#09000e 55%,#020004 100%);transition:opacity .9s,visibility .9s}
-#intro.hide{opacity:0;visibility:hidden;pointer-events:none}
-#introVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
-#intro:after{content:"";position:absolute;inset:0;background:rgba(20,0,35,.45);z-index:1}
-.intro-box{position:relative;z-index:2;width:min(430px,90%);padding:40px 25px;border-radius:30px;text-align:center;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(18px);box-shadow:0 8px 40px rgba(0,0,0,.45),0 0 45px rgba(168,85,247,.25),inset 0 1px 1px rgba(255,255,255,.25);overflow:hidden}
-.lock{font-size:75px;margin-bottom:20px;filter:drop-shadow(0 0 10px #a855f7) drop-shadow(0 0 30px #7e22ce);animation:lockFloat 2.5s ease-in-out infinite}
-@keyframes lockFloat{50%{transform:translateY(-10px)}}
-.intro-box h1{font-size:clamp(25px,6vw,38px);margin-bottom:10px}.intro-box p{opacity:.7;margin-bottom:25px}
-#pin{width:100%;height:52px;border:1px solid rgba(220,160,255,.3);outline:0;border-radius:15px;text-align:center;font-size:22px;letter-spacing:8px;color:#fff;background:#24102f}
-#unlock,#enterUniverse,#letterButton{border:0;color:#fff;font-weight:700;cursor:pointer}
-#unlock{width:100%;height:52px;margin-top:15px;border-radius:15px;background:linear-gradient(135deg,#7c2ae8,#c05cff);box-shadow:0 0 25px rgba(168,85,247,.4)}
-#error{min-height:20px;margin-top:12px;color:#ff9ddc;font-size:14px}
-#welcome{z-index:2500;flex-direction:column;background:radial-gradient(circle,rgba(100,25,150,.35),#0a0010 60%,#030006 100%);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .8s}
-#welcome.show{opacity:1;visibility:visible;pointer-events:auto}
-.welcome-video-container{width:min(520px,80vw);height:min(300px,45vw);padding:6px;margin-bottom:10px;border-radius:22px;background:linear-gradient(135deg,#7e22ce,#d946ef,#a855f7);box-shadow:0 0 20px rgba(217,70,239,.55),0 0 45px rgba(147,51,234,.3)}
-.welcome-video{width:100%;height:100%;display:block;object-fit:cover;border-radius:16px;background:#050008}
-#welcome h1{margin-top:15px;font-size:clamp(35px,8vw,65px);text-shadow:0 0 10px #c084fc,0 0 30px #a855f7}
-#welcome p{margin-top:10px;opacity:.75;font-size:18px}
-#enterUniverse{margin-top:30px;padding:15px 32px;border-radius:30px;font-size:16px;background:linear-gradient(135deg,#7e22ce,#c026d3);box-shadow:0 0 30px rgba(192,38,211,.5)}
-#title{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:100;width:90%;text-align:center;font-size:clamp(24px,5vw,48px);text-shadow:0 0 10px #c084fc,0 0 30px #9333ea;pointer-events:none;opacity:0;transition:opacity 1.2s}
-#title.visible{opacity:1}
-#hint{position:fixed;top:82px;left:50%;transform:translateX(-50%);z-index:100;width:90%;text-align:center;font-size:13px;color:#eadcff;opacity:0;transition:opacity 1.2s;pointer-events:none}
-#hint.visible{opacity:.6}
-#letterButton{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);z-index:200;padding:14px 25px;border-radius:30px;background:linear-gradient(135deg,#7e22ce,#d946ef);box-shadow:0 0 25px rgba(217,70,239,.45);opacity:0;pointer-events:none;transition:.25s}
-#letterButton.visible{opacity:1;pointer-events:auto}
-.modal{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,0,10,.88);backdrop-filter:blur(8px)}
-.modal.show{display:flex}
-.modal-card{position:relative;width:min(680px,94vw);max-height:85vh;overflow:auto;padding:35px;border-radius:28px;background:linear-gradient(145deg,#21082d,#100316);border:1px solid rgba(220,170,255,.45);box-shadow:0 0 60px rgba(168,85,247,.35)}
-.modal-card img{width:100%;max-height:400px;object-fit:contain;border-radius:20px;margin-bottom:20px}
-.close{position:absolute;top:10px;right:15px;width:40px;height:40px;border:0;border-radius:50%;background:#32133f;color:#fff;font-size:25px;cursor:pointer}
-.modal-card h2{margin-bottom:12px;color:#e9b6ff}
-.modal-card p{line-height:1.7;white-space:pre-line;opacity:.85}
-.letter h2{text-align:center;margin-bottom:25px;font-size:32px}
-.letter-content{white-space:pre-line;line-height:1.9;text-align:left;color:#f6e9ff;font-size:16px}
-#visualOverlay{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:visible}
-.photo-card{position:absolute;left:0;top:0;width:145px;padding:7px;border-radius:17px;background:linear-gradient(145deg,rgba(48,10,68,.96),rgba(18,2,28,.96));border:1px solid rgba(225,180,255,.65);box-shadow:0 0 24px rgba(168,85,247,.3);pointer-events:auto;cursor:pointer;transform-origin:center;will-change:transform}
-.photo-card img{display:block;width:100%;height:105px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:#1b0627}
-.photo-card .photo-title{margin-top:7px;padding:0 4px 3px;text-align:center;color:#f4ddff;font:bold 12px Arial;line-height:1.25;text-shadow:0 0 8px rgba(192,132,252,.7)}
-#heartAura{position:absolute;left:50%;top:50%;width:300px;height:300px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,225,255,.25) 0%,rgba(236,72,244,.38) 18%,rgba(192,38,211,.22) 38%,rgba(126,34,206,.1) 58%,transparent 78%);filter:blur(12px);pointer-events:none;z-index:5450}
-#heartOverlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:220px;line-height:1;color:#c026ff;text-shadow:0 0 10px #fff,0 0 24px #f0abff,0 0 55px #c026ff,0 0 95px #7e22ce;pointer-events:none;z-index:5550}
-#threeError{position:fixed;inset:0;z-index:6000;display:none;align-items:center;justify-content:center;text-align:center;background:#08000d;padding:30px}
-.three-error-box{max-width:500px}
-.three-error-box h2{color:#d8a7ff;margin-bottom:15px}
-.three-error-box p{opacity:.75;line-height:1.6}
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+user-select:none;
+-webkit-user-select:none
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+background:#020004;
+color:#fff;
+font-family:Arial,Helvetica,sans-serif
+}
+
+#canvas{
+position:fixed;
+inset:0;
+width:100%;
+height:100%;
+display:block;
+opacity:0;
+visibility:hidden;
+transition:opacity .8s;
+z-index:1
+}
+
+#canvas.visible{
+opacity:1;
+visibility:visible
+}
+
+#intro,#welcome{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center
+}
+
+#intro{
+z-index:3000;
+background:radial-gradient(circle,#180625 0%,#09000e 55%,#020004 100%);
+transition:opacity .9s,visibility .9s
+}
+
+#intro.hide{
+opacity:0;
+visibility:hidden;
+pointer-events:none
+}
+
+#introVideo{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:0;
+pointer-events:none
+}
+
+#intro:after{
+content:"";
+position:absolute;
+inset:0;
+background:rgba(20,0,35,.45);
+z-index:1
+}
+
+.intro-box{
+position:relative;
+z-index:2;
+width:min(430px,90%);
+padding:40px 25px;
+border-radius:30px;
+text-align:center;
+background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));
+border:1px solid rgba(255,255,255,.35);
+backdrop-filter:blur(18px);
+box-shadow:0 8px 40px rgba(0,0,0,.45),0 0 45px rgba(168,85,247,.25),inset 0 1px 1px rgba(255,255,255,.25);
+overflow:hidden
+}
+
+.lock{
+font-size:75px;
+margin-bottom:20px;
+filter:drop-shadow(0 0 10px #a855f7) drop-shadow(0 0 30px #7e22ce);
+animation:lockFloat 2.5s ease-in-out infinite
+}
+
+@keyframes lockFloat{
+50%{transform:translateY(-10px)}
+}
+
+.intro-box h1{
+font-size:clamp(25px,6vw,38px);
+margin-bottom:10px
+}
+
+.intro-box p{
+opacity:.7;
+margin-bottom:25px
+}
+
+#pin{
+width:100%;
+height:52px;
+border:1px solid rgba(220,160,255,.3);
+outline:0;
+border-radius:15px;
+text-align:center;
+font-size:22px;
+letter-spacing:8px;
+color:#fff;
+background:#24102f
+}
+
+#unlock,#enterUniverse,#letterButton{
+border:0;
+color:#fff;
+font-weight:700;
+cursor:pointer
+}
+
+#unlock{
+width:100%;
+height:52px;
+margin-top:15px;
+border-radius:15px;
+background:linear-gradient(135deg,#7c2ae8,#c05cff);
+box-shadow:0 0 25px rgba(168,85,247,.4)
+}
+
+#error{
+min-height:20px;
+margin-top:12px;
+color:#ff9ddc;
+font-size:14px
+}
+
+#welcome{
+z-index:2500;
+flex-direction:column;
+background:radial-gradient(circle,rgba(100,25,150,.35),#0a0010 60%,#030006 100%);
+opacity:0;
+visibility:hidden;
+pointer-events:none;
+transition:opacity .8s
+}
+
+#welcome.show{
+opacity:1;
+visibility:visible;
+pointer-events:auto
+}
+
+.welcome-video-container{
+width:min(520px,80vw);
+height:min(300px,45vw);
+padding:6px;
+margin-bottom:10px;
+border-radius:22px;
+background:linear-gradient(135deg,#7e22ce,#d946ef,#a855f7);
+box-shadow:0 0 20px rgba(217,70,239,.55),0 0 45px rgba(147,51,234,.3)
+}
+
+.welcome-video{
+width:100%;
+height:100%;
+display:block;
+object-fit:cover;
+border-radius:16px;
+background:#050008
+}
+
+#welcome h1{
+margin-top:15px;
+font-size:clamp(35px,8vw,65px);
+text-shadow:0 0 10px #c084fc,0 0 30px #a855f7
+}
+
+#welcome p{
+margin-top:10px;
+opacity:.75;
+font-size:18px
+}
+
+#enterUniverse{
+margin-top:30px;
+padding:15px 32px;
+border-radius:30px;
+font-size:16px;
+background:linear-gradient(135deg,#7e22ce,#c026d3);
+box-shadow:0 0 30px rgba(192,38,211,.5)
+}
+
+#title{
+position:fixed;
+top:24px;
+left:50%;
+transform:translateX(-50%);
+z-index:100;
+width:90%;
+text-align:center;
+font-size:clamp(24px,5vw,48px);
+text-shadow:0 0 10px #c084fc,0 0 30px #9333ea;
+pointer-events:none;
+opacity:0;
+transition:opacity 1.2s
+}
+
+#title.visible{
+opacity:1
+}
+
+#hint{
+position:fixed;
+top:82px;
+left:50%;
+transform:translateX(-50%);
+z-index:100;
+width:90%;
+text-align:center;
+font-size:13px;
+color:#eadcff;
+opacity:0;
+transition:opacity 1.2s;
+pointer-events:none
+}
+
+#hint.visible{
+opacity:.6
+}
+
+#letterButton{
+position:fixed;
+bottom:25px;
+left:50%;
+transform:translateX(-50%);
+z-index:200;
+padding:14px 25px;
+border-radius:30px;
+background:linear-gradient(135deg,#7e22ce,#d946ef);
+box-shadow:0 0 25px rgba(217,70,239,.45);
+opacity:0;
+pointer-events:none;
+transition:.25s
+}
+
+#letterButton.visible{
+opacity:1;
+pointer-events:auto
+}
+
+.modal{
+position:fixed;
+inset:0;
+z-index:5000;
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:rgba(5,0,10,.88);
+backdrop-filter:blur(8px)
+}
+
+.modal.show{
+display:flex
+}
+
+.modal-card{
+position:relative;
+width:min(680px,94vw);
+max-height:85vh;
+overflow:auto;
+padding:35px;
+border-radius:28px;
+background:linear-gradient(145deg,#21082d,#100316);
+border:1px solid rgba(220,170,255,.45);
+box-shadow:0 0 60px rgba(168,85,247,.35)
+}
+
+.modal-card img{
+width:100%;
+max-height:400px;
+object-fit:contain;
+border-radius:20px;
+margin-bottom:20px
+}
+
+.close{
+position:absolute;
+top:10px;
+right:15px;
+width:40px;
+height:40px;
+border:0;
+border-radius:50%;
+background:#32133f;
+color:#fff;
+font-size:25px;
+cursor:pointer
+}
+
+.modal-card h2{
+margin-bottom:12px;
+color:#e9b6ff
+}
+
+.modal-card p{
+line-height:1.7;
+white-space:pre-line;
+opacity:.85
+}
+
+.letter h2{
+text-align:center;
+margin-bottom:25px;
+font-size:32px
+}
+
+.letter-content{
+white-space:pre-line;
+line-height:1.9;
+text-align:left;
+color:#f6e9ff;
+font-size:16px
+}
+
+#visualOverlay{
+position:fixed;
+inset:0;
+z-index:40;
+pointer-events:none;
+overflow:visible
+}
+
+.photo-card{
+position:absolute;
+left:0;
+top:0;
+width:145px;
+padding:7px;
+border-radius:17px;
+background:linear-gradient(145deg,rgba(48,10,68,.96),rgba(18,2,28,.96));
+border:1px solid rgba(225,180,255,.65);
+box-shadow:0 0 24px rgba(168,85,247,.3);
+pointer-events:auto;
+cursor:pointer;
+transform-origin:center;
+will-change:transform
+}
+
+.photo-card img{
+display:block;
+width:100%;
+height:105px;
+object-fit:cover;
+border-radius:12px;
+border:1px solid rgba(255,255,255,.25);
+background:#1b0627
+}
+
+.photo-card .photo-title{
+margin-top:7px;
+padding:0 4px 3px;
+text-align:center;
+color:#f4ddff;
+font:bold 12px Arial;
+line-height:1.25;
+text-shadow:0 0 8px rgba(192,132,252,.7)
+}
+
+#heartAura{
+position:absolute;
+left:50%;
+top:50%;
+width:300px;
+height:300px;
+transform:translate(-50%,-50%);
+border-radius:50%;
+background:radial-gradient(
+circle,
+rgba(255,225,255,.25) 0%,
+rgba(236,72,244,.38) 18%,
+rgba(192,38,211,.22) 38%,
+rgba(126,34,206,.1) 58%,
+transparent 78%
+);
+filter:blur(12px);
+pointer-events:none;
+z-index:5450
+}
+
+#heartOverlay{
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+font-size:220px;
+line-height:1;
+color:#c026ff;
+text-shadow:
+0 0 10px #fff,
+0 0 24px #f0abff,
+0 0 55px #c026ff,
+0 0 95px #7e22ce;
+pointer-events:none;
+z-index:5550
+}
+
+#threeError{
+position:fixed;
+inset:0;
+z-index:6000;
+display:none;
+align-items:center;
+justify-content:center;
+text-align:center;
+background:#08000d;
+padding:30px
+}
+
+.three-error-box{
+max-width:500px
+}
+
+.three-error-box h2{
+color:#d8a7ff;
+margin-bottom:15px
+}
+
+.three-error-box p{
+opacity:.75;
+line-height:1.6
+}
+
 @media(max-width:600px){
-.intro-box{padding:30px 20px}
-#title{top:18px}
-#hint{top:67px}
-#letterButton{bottom:15px}
-.modal-card{padding:25px 20px}
-#heartOverlay{font-size:170px}
-.photo-card{width:122px}
-.photo-card img{height:86px}
+
+.intro-box{
+padding:30px 20px
+}
+
+#title{
+top:18px
+}
+
+#hint{
+top:67px
+}
+
+#letterButton{
+bottom:15px
+}
+
+.modal-card{
+padding:25px 20px
+}
+
+#heartOverlay{
+font-size:170px
+}
+
+.photo-card{
+width:122px
+}
+
+.photo-card img{
+height:86px
+}
+
 }
 </style>
 </head>
@@ -70,6 +488,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#020004;color:#fff;f
 <body>
 
 <canvas id="canvas"></canvas>
+
+<div id="visualOverlay"></div>
 
 <h1 id="title"></h1>
 
@@ -79,7 +499,13 @@ Arrastra para explorar · rueda para acercar · toca las imágenes ✨
 
 <div id="intro">
 
-<video id="introVideo" autoplay muted loop playsinline>
+<video
+id="introVideo"
+autoplay
+muted
+loop
+playsinline
+>
 <source src="2.mp4" type="video/mp4">
 </video>
 
@@ -111,8 +537,8 @@ placeholder="••••"
 <div id="error"></div>
 
 </div>
-</div>
 
+</div>
 
 <div id="welcome">
 
@@ -149,11 +575,9 @@ Preparé un pequeño lugar para ti.
 
 </div>
 
-
 <button id="letterButton">
 💌 Hay algo más para ti...
 </button>
-
 
 <div id="photoModal" class="modal">
 
@@ -179,7 +603,6 @@ Para ti 💜
 
 </div>
 
-
 <div id="letterModal" class="modal">
 
 <div class="modal-card letter">
@@ -201,7 +624,6 @@ class="letter-content"
 
 </div>
 
-
 <div id="threeError">
 
 <div class="three-error-box">
@@ -219,7 +641,6 @@ Revisa tu conexión y vuelve a abrir el archivo.
 
 </div>
 
-
 <audio id="music" loop>
 
 <source src="3.mp3" type="audio/mpeg">
@@ -227,7 +648,118 @@ Revisa tu conexión y vuelve a abrir el archivo.
 </audio>
 
 
+<!-- EL CANDADO FUNCIONA INDEPENDIENTEMENTE DEL RESTO -->
+
+<script>
+(function(){
+
+const intro =
+document.getElementById("intro");
+
+const pin =
+document.getElementById("pin");
+
+const unlock =
+document.getElementById("unlock");
+
+const error =
+document.getElementById("error");
+
+const welcome =
+document.getElementById("welcome");
+
+const lockIcon =
+document.getElementById("lockIcon");
+
+const music =
+document.getElementById("music");
+
+window.unlockPage =
+function(){
+
+const entered =
+(pin.value || "").trim();
+
+if(
+entered !== "1234"
+){
+
+error.textContent =
+"Código incorrecto 💜";
+
+pin.value =
+"";
+
+pin.focus();
+
+return;
+
+}
+
+error.textContent =
+"";
+
+lockIcon.textContent =
+"🔓";
+
+intro.classList.add(
+"hide"
+);
+
+setTimeout(
+function(){
+
+welcome.classList.add(
+"show"
+);
+
+},
+500
+);
+
+try{
+
+music.volume =
+.25;
+
+const p =
+music.play();
+
+if(
+p &&
+p.catch
+)
+p.catch(
+function(){}
+);
+
+}
+catch(e){}
+
+};
+
+unlock.addEventListener(
+"click",
+window.unlockPage
+);
+
+pin.addEventListener(
+"keydown",
+function(e){
+
+if(
+e.key === "Enter"
+)
+window.unlockPage();
+
+});
+
+})();
+</script>
+
+
 <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+
 
 <script>
 
@@ -336,72 +868,59 @@ piensa que quizá así te veo yo:
 
 una entre millones,
 pero imposible de reemplazar. 💜`
-
 };
 
 
 const intro =
-document.getElementById("intro");
-
-const pin =
-document.getElementById("pin");
-
-const unlock =
-document.getElementById("unlock");
-
-const error =
-document.getElementById("error");
-
-const welcome =
-document.getElementById("welcome");
+document.getElementById('intro');
 
 const personName =
-document.getElementById("personName");
+document.getElementById('personName');
 
 const enterUniverse =
-document.getElementById("enterUniverse");
+document.getElementById('enterUniverse');
 
 const canvas =
-document.getElementById("canvas");
+document.getElementById('canvas');
 
 const title =
-document.getElementById("title");
+document.getElementById('title');
 
 const hint =
-document.getElementById("hint");
+document.getElementById('hint');
 
 const letterButton =
-document.getElementById("letterButton");
+document.getElementById('letterButton');
 
 const letterModal =
-document.getElementById("letterModal");
+document.getElementById('letterModal');
 
 const letterClose =
-document.getElementById("letterClose");
+document.getElementById('letterClose');
 
 const letterContent =
-document.getElementById("letterContent");
+document.getElementById('letterContent');
 
 const photoModal =
-document.getElementById("photoModal");
+document.getElementById('photoModal');
 
 const photoClose =
-document.getElementById("photoClose");
+document.getElementById('photoClose');
 
 const modalImage =
-document.getElementById("modalImage");
+document.getElementById('modalImage');
 
 const modalTitle =
-document.getElementById("modalTitle");
+document.getElementById('modalTitle');
 
 const modalText =
-document.getElementById("modalText");
+document.getElementById('modalText');
 
 const music =
-document.getElementById("music");
+document.getElementById('music');
 
 const threeError =
-document.getElementById("threeError");
+document.getElementById('threeError');
 
 
 personName.textContent =
@@ -433,81 +952,6 @@ currentX=.04,
 targetZoom=420;
 
 
-function unlockPage(){
-
-const entered =
-pin.value.trim();
-
-if(entered !== CONFIG.codigo){
-
-error.textContent =
-"Código incorrecto 💜";
-
-pin.value = "";
-
-pin.animate(
-[
-{transform:"translateX(-8px)"},
-{transform:"translateX(8px)"},
-{transform:"translateX(-8px)"},
-{transform:"translateX(0)"}
-],
-{
-duration:300
-}
-);
-
-return;
-
-}
-
-error.textContent = "";
-
-document.getElementById(
-"lockIcon"
-).textContent =
-"🔓";
-
-music.volume =
-0.25;
-
-music.play().catch(
-()=>{}
-);
-
-setTimeout(
-()=>{
-intro.classList.add("hide");
-},
-300
-);
-
-setTimeout(
-()=>{
-welcome.classList.add("show");
-},
-700
-);
-
-}
-
-
-unlock.addEventListener(
-"click",
-unlockPage
-);
-
-
-pin.addEventListener(
-"keydown",
-e=>{
-if(e.key==="Enter"){
-unlockPage();
-}
-}
-);
-
-
 function radialTexture(
 stops,
 size=768
@@ -515,17 +959,15 @@ size=768
 
 const c =
 document.createElement(
-"canvas"
+'canvas'
 );
 
 c.width =
-size;
-
 c.height =
 size;
 
 const x =
-c.getContext("2d");
+c.getContext('2d');
 
 const g =
 x.createRadialGradient(
@@ -538,12 +980,11 @@ size*.48
 );
 
 stops.forEach(
-s=>{
+s =>
 g.addColorStop(
 s[0],
 s[1]
-);
-}
+)
 );
 
 x.fillStyle =
@@ -574,10 +1015,10 @@ new THREE.SpriteMaterial({
 
 map:
 radialTexture([
-[0,"rgba(255,205,255,.23)"],
-[.2,"rgba(218,63,255,.16)"],
-[.55,"rgba(70,12,130,.08)"],
-[1,"rgba(0,0,0,0)"]
+[0,'rgba(255,205,255,.23)'],
+[.2,'rgba(218,63,255,.16)'],
+[.55,'rgba(70,12,130,.08)'],
+[1,'rgba(0,0,0,0)']
 ]),
 
 transparent:true,
@@ -608,9 +1049,9 @@ new THREE.SpriteMaterial({
 
 map:
 radialTexture([
-[0,"rgba(255,70,240,.15)"],
-[.25,"rgba(190,55,255,.1)"],
-[1,"rgba(0,0,0,0)"]
+[0,'rgba(255,70,240,.15)'],
+[.25,'rgba(190,55,255,.1)'],
+[1,'rgba(0,0,0,0)']
 ]),
 
 transparent:true,
@@ -662,11 +1103,11 @@ i++
 ){
 
 const r =
-650 +
+650+
 Math.random()*1800;
 
 const t =
-Math.random() *
+Math.random()*
 Math.PI*2;
 
 const u =
@@ -691,7 +1132,7 @@ const geo =
 new THREE.BufferGeometry();
 
 geo.setAttribute(
-"position",
+'position',
 new THREE.BufferAttribute(
 p,
 3
@@ -787,10 +1228,14 @@ Math.random();
 
 col.setHSL(
 q<.5
-?.84+Math.random()*.05
-:q<.85
-?.75+Math.random()*.1
-:.92+Math.random()*.03,
+?
+.84+Math.random()*.05
+:
+q<.85
+?
+.75+Math.random()*.1
+:
+.92+Math.random()*.03,
 .88,
 .62+Math.random()*.24
 );
@@ -810,7 +1255,7 @@ const geo =
 new THREE.BufferGeometry();
 
 geo.setAttribute(
-"position",
+'position',
 new THREE.BufferAttribute(
 p,
 3
@@ -818,7 +1263,7 @@ p,
 );
 
 geo.setAttribute(
-"color",
+'color',
 new THREE.BufferAttribute(
 c,
 3
@@ -891,17 +1336,17 @@ function createHeart(){
 
 const overlay =
 document.createElement(
-"div"
+'div'
 );
 
 overlay.id =
-"heartOverlay";
+'heartOverlay';
 
 overlay.textContent =
-"♥";
+'♥';
 
 document.getElementById(
-"visualOverlay"
+'visualOverlay'
 ).appendChild(
 overlay
 );
@@ -909,14 +1354,14 @@ overlay
 
 const aura =
 document.createElement(
-"div"
+'div'
 );
 
 aura.id =
-"heartAura";
+'heartAura';
 
 document.getElementById(
-"visualOverlay"
+'visualOverlay'
 ).appendChild(
 aura
 );
@@ -935,7 +1380,7 @@ photoGroup
 
 const overlay =
 document.getElementById(
-"visualOverlay"
+'visualOverlay'
 );
 
 
@@ -960,7 +1405,7 @@ Math.sin(angle)*22,
 Math.sin(angle)*radius
 );
 
-anchor.userData = {
+anchor.userData={
 
 angle,
 radius,
@@ -977,16 +1422,16 @@ anchor
 
 const card =
 document.createElement(
-"div"
+'div'
 );
 
 card.className =
-"photo-card";
+'photo-card';
 
 
 const img =
 document.createElement(
-"img"
+'img'
 );
 
 img.src =
@@ -1001,11 +1446,11 @@ false;
 
 const label =
 document.createElement(
-"div"
+'div'
 );
 
 label.className =
-"photo-title";
+'photo-title';
 
 label.textContent =
 data.titulo;
@@ -1018,15 +1463,14 @@ label
 
 
 card.addEventListener(
-"pointerdown",
-e=>{
-e.stopPropagation();
-}
+'pointerdown',
+e =>
+e.stopPropagation()
 );
 
 
 card.addEventListener(
-"click",
+'click',
 e=>{
 
 e.stopPropagation();
@@ -1041,7 +1485,7 @@ modalImage.src =
 data.imagen;
 
 photoModal.classList.add(
-"show"
+'show'
 );
 
 }
@@ -1138,17 +1582,16 @@ function initUniverse(){
 try{
 
 if(
-typeof THREE ===
-"undefined"
+typeof THREE===
+'undefined'
 ){
 
 threeError.style.display =
-"flex";
+'flex';
 
 return false;
 
 }
-
 
 renderer =
 new THREE.WebGLRenderer({
@@ -1160,7 +1603,7 @@ antialias:true,
 alpha:false,
 
 powerPreference:
-"high-performance"
+'high-performance'
 
 });
 
@@ -1252,7 +1695,7 @@ catch(e){
 console.error(e);
 
 threeError.style.display =
-"flex";
+'flex';
 
 return false;
 
@@ -1266,7 +1709,7 @@ false;
 
 
 enterUniverse.addEventListener(
-"click",
+'click',
 ()=>{
 
 if(entering)
@@ -1277,7 +1720,9 @@ true;
 
 if(!initialized){
 
-if(!initUniverse()){
+if(
+!initUniverse()
+){
 
 entering =
 false;
@@ -1292,11 +1737,11 @@ true;
 }
 
 canvas.classList.add(
-"visible"
+'visible'
 );
 
 welcome.classList.remove(
-"show"
+'show'
 );
 
 
@@ -1304,15 +1749,15 @@ setTimeout(
 ()=>{
 
 title.classList.add(
-"visible"
+'visible'
 );
 
 hint.classList.add(
-"visible"
+'visible'
 );
 
 letterButton.classList.add(
-"visible"
+'visible'
 );
 
 entering =
@@ -1327,7 +1772,7 @@ false;
 
 
 canvas.addEventListener(
-"pointerdown",
+'pointerdown',
 e=>{
 
 dragging =
@@ -1348,7 +1793,7 @@ e.pointerId
 
 
 canvas.addEventListener(
-"pointermove",
+'pointermove',
 e=>{
 
 if(!dragging)
@@ -1380,11 +1825,11 @@ e.clientY;
 
 
 [
-"pointerup",
-"pointercancel",
-"pointerleave"
+'pointerup',
+'pointercancel',
+'pointerleave'
 ].forEach(
-n=>
+n =>
 canvas.addEventListener(
 n,
 ()=>dragging=false
@@ -1393,7 +1838,7 @@ n,
 
 
 canvas.addEventListener(
-"wheel",
+'wheel',
 e=>{
 
 e.preventDefault();
@@ -1476,12 +1921,12 @@ Math.sin(t*1.7)*
 
 const heart =
 document.getElementById(
-"heartOverlay"
+'heartOverlay'
 );
 
 const aura =
 document.getElementById(
-"heartAura"
+'heartAura'
 );
 
 
@@ -1505,7 +1950,6 @@ heartDist
 )
 );
 
-
 aura.style.zIndex =
 String(
 5548-
@@ -1525,11 +1969,9 @@ a=>{
 const d =
 a.userData;
 
-
 d.angle +=
 d.speed*
 .001;
-
 
 a.position.x =
 Math.cos(d.angle)*
@@ -1571,7 +2013,7 @@ projected.y > 1.3
 ){
 
 card.style.display =
-"none";
+'none';
 
 return;
 
@@ -1604,7 +2046,7 @@ Math.min(
 
 
 card.style.display =
-"block";
+'block';
 
 
 card.style.transform =
@@ -1614,9 +2056,7 @@ card.style.transform =
 card.style.zIndex =
 String(
 5550-
-Math.floor(
-dist
-)
+Math.floor(dist)
 );
 
 }
@@ -1624,7 +2064,7 @@ dist
 
 
 sparkleGroup.children.forEach(
-s=>
+s =>
 s.material.opacity =
 .3+
 (
@@ -1645,16 +2085,16 @@ camera
 
 
 photoClose.addEventListener(
-"click",
-()=>
+'click',
+() =>
 photoModal.classList.remove(
-"show"
+'show'
 )
 );
 
 
 photoModal.addEventListener(
-"click",
+'click',
 e=>{
 
 if(
@@ -1663,7 +2103,7 @@ photoModal
 ){
 
 photoModal.classList.remove(
-"show"
+'show'
 );
 
 }
@@ -1673,25 +2113,25 @@ photoModal.classList.remove(
 
 
 letterButton.addEventListener(
-"click",
-()=>
+'click',
+() =>
 letterModal.classList.add(
-"show"
+'show'
 )
 );
 
 
 letterClose.addEventListener(
-"click",
-()=>
+'click',
+() =>
 letterModal.classList.remove(
-"show"
+'show'
 )
 );
 
 
 letterModal.addEventListener(
-"click",
+'click',
 e=>{
 
 if(
@@ -1700,7 +2140,7 @@ letterModal
 ){
 
 letterModal.classList.remove(
-"show"
+'show'
 );
 
 }
@@ -1710,7 +2150,7 @@ letterModal.classList.remove(
 
 
 addEventListener(
-"resize",
+'resize',
 ()=>{
 
 if(
