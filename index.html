@@ -3061,12 +3061,96 @@ let currentRotationY = 0;
 let targetRotationX = 0.05;
 let currentRotationX = 0.05;
 
+
+/* =========================================================
+   ZOOM
+========================================================= */
+
 let targetZoom = 420;
 
+/*
+   PC/LAPTOP:
+   rueda del mouse para zoom.
+
+   CELULAR:
+   dos dedos para acercar/alejar.
+*/
+
+const MIN_ZOOM = 220;
+const MAX_ZOOM = 1100;
+
+
+/* =========================================================
+   CONTROL TÁCTIL
+========================================================= */
+
+const activePointers = new Map();
+
+let pinchStartDistance = 0;
+let pinchStartZoom = 420;
+
+
+/*
+   Evita que el navegador interprete
+   el gesto como zoom de la página.
+*/
+canvas.style.touchAction = "none";
+
+
+/* =========================================================
+   POINTER DOWN
+========================================================= */
 
 canvas.addEventListener(
     "pointerdown",
     function(e){
+
+        activePointers.set(
+            e.pointerId,
+            {
+                x:e.clientX,
+                y:e.clientY
+            }
+        );
+
+        canvas.setPointerCapture(
+            e.pointerId
+        );
+
+
+        /* DOS DEDOS = ZOOM */
+
+        if(activePointers.size === 2){
+
+            dragging = false;
+
+            const points =
+                Array.from(
+                    activePointers.values()
+                );
+
+            const dx =
+                points[0].x -
+                points[1].x;
+
+            const dy =
+                points[0].y -
+                points[1].y;
+
+            pinchStartDistance =
+                Math.hypot(
+                    dx,
+                    dy
+                );
+
+            pinchStartZoom =
+                targetZoom;
+
+            return;
+        }
+
+
+        /* UN DEDO = GIRAR */
 
         dragging = true;
 
@@ -3076,21 +3160,100 @@ canvas.addEventListener(
         previousY =
             e.clientY;
 
-        canvas.setPointerCapture(
-            e.pointerId
-        );
-
     }
 );
 
+
+/* =========================================================
+   POINTER MOVE
+========================================================= */
 
 canvas.addEventListener(
     "pointermove",
     function(e){
 
+        if(
+            !activePointers.has(
+                e.pointerId
+            )
+        ){
+
+            return;
+
+        }
+
+
+        activePointers.set(
+            e.pointerId,
+            {
+                x:e.clientX,
+                y:e.clientY
+            }
+        );
+
+
+        /* =================================================
+           DOS DEDOS
+           ZOOM
+        ================================================= */
+
+        if(activePointers.size === 2){
+
+            const points =
+                Array.from(
+                    activePointers.values()
+                );
+
+            const dx =
+                points[0].x -
+                points[1].x;
+
+            const dy =
+                points[0].y -
+                points[1].y;
+
+            const distance =
+                Math.hypot(
+                    dx,
+                    dy
+                );
+
+
+            /*
+               Separar dedos = acercar
+               Juntar dedos = alejar
+            */
+
+            targetZoom =
+                pinchStartZoom -
+                (
+                    distance -
+                    pinchStartDistance
+                ) * 2.2;
+
+
+            targetZoom =
+                Math.max(
+                    MIN_ZOOM,
+                    Math.min(
+                        MAX_ZOOM,
+                        targetZoom
+                    )
+                );
+
+            return;
+        }
+
+
+        /* =================================================
+           UN DEDO
+           GIRAR
+        ================================================= */
+
         if(!dragging){
             return;
         }
+
 
         const dx =
             e.clientX -
@@ -3100,11 +3263,14 @@ canvas.addEventListener(
             e.clientY -
             previousY;
 
+
         targetRotationY +=
             dx * 0.003;
 
+
         targetRotationX +=
             dy * 0.001;
+
 
         targetRotationX =
             Math.max(
@@ -3115,6 +3281,7 @@ canvas.addEventListener(
                 )
             );
 
+
         previousX =
             e.clientX;
 
@@ -3125,9 +3292,42 @@ canvas.addEventListener(
 );
 
 
-function stopDragging(){
+/* =========================================================
+   POINTER UP
+========================================================= */
 
-    dragging = false;
+function stopDragging(e){
+
+    activePointers.delete(
+        e.pointerId
+    );
+
+
+    /*
+       Si queda un dedo después
+       del zoom, seguimos girando.
+    */
+
+    if(activePointers.size === 1){
+
+        const remaining =
+            Array.from(
+                activePointers.values()
+            )[0];
+
+        previousX =
+            remaining.x;
+
+        previousY =
+            remaining.y;
+
+        dragging = true;
+
+    }else{
+
+        dragging = false;
+
+    }
 
 }
 
@@ -3144,12 +3344,26 @@ canvas.addEventListener(
 
 canvas.addEventListener(
     "pointerleave",
-    stopDragging
+    function(e){
+
+        activePointers.delete(
+            e.pointerId
+        );
+
+        if(
+            activePointers.size === 0
+        ){
+
+            dragging = false;
+
+        }
+
+    }
 );
 
 
 /* =========================================================
-   ZOOM
+   ZOOM PC / LAPTOP
 ========================================================= */
 
 canvas.addEventListener(
@@ -3159,13 +3373,14 @@ canvas.addEventListener(
         e.preventDefault();
 
         targetZoom +=
-            e.deltaY * 0.45;
+            e.deltaY * 0.55;
+
 
         targetZoom =
             Math.max(
-                250,
+                MIN_ZOOM,
                 Math.min(
-                    700,
+                    MAX_ZOOM,
                     targetZoom
                 )
             );
@@ -3175,403 +3390,403 @@ canvas.addEventListener(
         passive:false
     }
 );
-
-
-/* =========================================================
-   ANIMACIÓN
-========================================================= */
-
-const tempWorldPosition =
-    new THREE.Vector3();
-
-const heartWorldPosition =
-    new THREE.Vector3(0,0,0);
-
-function projectedWorld(object){
-
-    object.getWorldPosition(
-        tempWorldPosition
-    );
-
-    return tempWorldPosition;
-}
-
-const clock =
-    new THREE.Clock();
-
-function animate(){
-
-    requestAnimationFrame(
-        animate
-    );
-
-    if(
-        !renderer ||
-        !scene ||
-        !camera
-    ){
-
-        return;
-
+        
+    
+    /* =========================================================
+       ANIMACIÓN
+    ========================================================= */
+    
+    const tempWorldPosition =
+        new THREE.Vector3();
+    
+    const heartWorldPosition =
+        new THREE.Vector3(0,0,0);
+    
+    function projectedWorld(object){
+    
+        object.getWorldPosition(
+            tempWorldPosition
+        );
+    
+        return tempWorldPosition;
     }
-
-    const time =
-        clock.getElapsedTime();
-
-    if(!dragging){
-
-        targetRotationY +=
-            0.00035;
-
-    }
-
-    currentRotationY +=
-        (
-            targetRotationY -
-            currentRotationY
-        ) * 0.035;
-
-    currentRotationX +=
-        (
-            targetRotationX -
-            currentRotationX
-        ) * 0.035;
-
-    galaxy.rotation.y =
-        currentRotationY;
-
-    galaxy.rotation.x =
-        currentRotationX;
-
-    camera.position.z +=
-        (
-            targetZoom -
-            camera.position.z
-        ) * 0.06;
-
-    (window.__allRings || [])
-        .forEach(
-            function(orbit){
-
-                const speed =
-                    orbit.userData.orbitSpeed ||
-                    0.00025;
-
-                orbit.rotation.z +=
-                    speed;
-
-                if(
-                    orbit.userData.glow
-                ){
-
-                    orbit.userData.glow.rotation.z +=
-                        speed * 0.84;
-
+    
+    const clock =
+        new THREE.Clock();
+    
+    function animate(){
+    
+        requestAnimationFrame(
+            animate
+        );
+    
+        if(
+            !renderer ||
+            !scene ||
+            !camera
+        ){
+    
+            return;
+    
+        }
+    
+        const time =
+            clock.getElapsedTime();
+    
+        if(!dragging){
+    
+            targetRotationY +=
+                0.00035;
+    
+        }
+    
+        currentRotationY +=
+            (
+                targetRotationY -
+                currentRotationY
+            ) * 0.035;
+    
+        currentRotationX +=
+            (
+                targetRotationX -
+                currentRotationX
+            ) * 0.035;
+    
+        galaxy.rotation.y =
+            currentRotationY;
+    
+        galaxy.rotation.x =
+            currentRotationX;
+    
+        camera.position.z +=
+            (
+                targetZoom -
+                camera.position.z
+            ) * 0.06;
+    
+        (window.__allRings || [])
+            .forEach(
+                function(orbit){
+    
+                    const speed =
+                        orbit.userData.orbitSpeed ||
+                        0.00025;
+    
+                    orbit.rotation.z +=
+                        speed;
+    
+                    if(
+                        orbit.userData.glow
+                    ){
+    
+                        orbit.userData.glow.rotation.z +=
+                            speed * 0.84;
+    
+                    }
+    
                 }
-
-            }
-        );
-
-    if(window.__orbitDust){
-
-        window.__orbitDust.rotation.z +=
-            0.00018;
-
-        window.__orbitDust.rotation.y -=
-            0.00006;
-
-    }
-
-    if(window.__galaxyDust){
-
-        window.__galaxyDust.rotation.y +=
-            0.00012;
-
-        window.__galaxyDust.rotation.z -=
-            0.000035;
-
-    }
-
-    const pulse =
-        1 +
-        Math.sin(
-            time * 1.7
-        ) *
-        0.035;
-
-    heart.scale.set(
-        175 * pulse,
-        175 * pulse,
-        1
-    );
-
-    const glowPulse =
-        1 +
-        Math.sin(
-            time * 1.4
-        ) *
-        0.04;
-
-    if(glow){
-
-        glow.scale.set(
-            280 * glowPulse,
-            280 * glowPulse,
-            1
-        );
-
-    }
-
-    stars.rotation.y +=
-        0.000025;
-
-    /* CORAZÓN CENTRAL: pulso + profundidad real */
-
-    const heartOverlay =
-        document.getElementById(
-            "heartOverlay"
-        );
-
-    const heartAura =
-        document.getElementById(
-            "heartAura"
-        );
-
-    const heartPulse =
-        1 +
-        Math.sin(
-            time * 2.2
-        ) *
-        0.045;
-
-    if(heartOverlay){
-
-        heartOverlay.style.transform =
-            `translate(-50%,-50%) scale(${heartPulse})`;
-
-        const heartDistance =
-            camera.position.distanceTo(
-                heartWorldPosition
             );
-
-        heartOverlay.style.zIndex =
-            String(
-                5000 -
-                Math.floor(
-                    heartDistance
-                )
-            );
-
-    }
-
-    if(heartAura){
-
-        const auraPulse =
+    
+        if(window.__orbitDust){
+    
+            window.__orbitDust.rotation.z +=
+                0.00018;
+    
+            window.__orbitDust.rotation.y -=
+                0.00006;
+    
+        }
+    
+        if(window.__galaxyDust){
+    
+            window.__galaxyDust.rotation.y +=
+                0.00012;
+    
+            window.__galaxyDust.rotation.z -=
+                0.000035;
+    
+        }
+    
+        const pulse =
             1 +
             Math.sin(
-                time * 1.8 +
-                0.7
+                time * 1.7
             ) *
-            0.06;
-
-        heartAura.style.transform =
-            `translate(-50%,-50%) scale(${auraPulse})`;
-
-        const auraDistance =
-            camera.position.distanceTo(
-                heartWorldPosition
+            0.035;
+    
+        heart.scale.set(
+            175 * pulse,
+            175 * pulse,
+            1
+        );
+    
+        const glowPulse =
+            1 +
+            Math.sin(
+                time * 1.4
+            ) *
+            0.04;
+    
+        if(glow){
+    
+            glow.scale.set(
+                280 * glowPulse,
+                280 * glowPulse,
+                1
             );
-
-        heartAura.style.zIndex =
-            String(
-                4998 -
-                Math.floor(
-                    auraDistance
-                )
+    
+        }
+    
+        stars.rotation.y +=
+            0.000025;
+    
+        /* CORAZÓN CENTRAL: pulso + profundidad real */
+    
+        const heartOverlay =
+            document.getElementById(
+                "heartOverlay"
             );
-
-    }
-
-    /* Las frases flotantes ya no se usan. */
-
-    if(photoGroup){
-
-        const projected =
-            new THREE.Vector3();
-
-        photoGroup.children.forEach(
-            function(anchor){
-
-                const data =
-                    anchor.userData;
-
-                data.angle +=
-                    data.speed *
-                    0.001;
-
-                anchor.position.x =
-                    Math.cos(
-                        data.angle
-                    ) *
-                    data.radius;
-
-                anchor.position.z =
-                    Math.sin(
-                        data.angle
-                    ) *
-                    data.radius;
-
-                anchor.position.y =
-                    data.baseY +
-                    Math.sin(
-                        time * 0.8 +
-                        data.angle
-                    ) *
-                    3;
-
-                const card =
-                    data.card;
-
-                if(!card){
-
-                    return;
-
-                }
-
-                anchor.getWorldPosition(
-                    projected
+    
+        const heartAura =
+            document.getElementById(
+                "heartAura"
+            );
+    
+        const heartPulse =
+            1 +
+            Math.sin(
+                time * 2.2
+            ) *
+            0.045;
+    
+        if(heartOverlay){
+    
+            heartOverlay.style.transform =
+                `translate(-50%,-50%) scale(${heartPulse})`;
+    
+            const heartDistance =
+                camera.position.distanceTo(
+                    heartWorldPosition
                 );
-
-                projected.project(
-                    camera
+    
+            heartOverlay.style.zIndex =
+                String(
+                    5000 -
+                    Math.floor(
+                        heartDistance
+                    )
                 );
-
-                const visible =
-                    projected.z >= -1 &&
-                    projected.z <= 1 &&
-                    projected.x >= -1.2 &&
-                    projected.x <= 1.2 &&
-                    projected.y >= -1.2 &&
-                    projected.y <= 1.2;
-
-                if(!visible){
-
+    
+        }
+    
+        if(heartAura){
+    
+            const auraPulse =
+                1 +
+                Math.sin(
+                    time * 1.8 +
+                    0.7
+                ) *
+                0.06;
+    
+            heartAura.style.transform =
+                `translate(-50%,-50%) scale(${auraPulse})`;
+    
+            const auraDistance =
+                camera.position.distanceTo(
+                    heartWorldPosition
+                );
+    
+            heartAura.style.zIndex =
+                String(
+                    4998 -
+                    Math.floor(
+                        auraDistance
+                    )
+                );
+    
+        }
+    
+        /* Las frases flotantes ya no se usan. */
+    
+        if(photoGroup){
+    
+            const projected =
+                new THREE.Vector3();
+    
+            photoGroup.children.forEach(
+                function(anchor){
+    
+                    const data =
+                        anchor.userData;
+    
+                    data.angle +=
+                        data.speed *
+                        0.001;
+    
+                    anchor.position.x =
+                        Math.cos(
+                            data.angle
+                        ) *
+                        data.radius;
+    
+                    anchor.position.z =
+                        Math.sin(
+                            data.angle
+                        ) *
+                        data.radius;
+    
+                    anchor.position.y =
+                        data.baseY +
+                        Math.sin(
+                            time * 0.8 +
+                            data.angle
+                        ) *
+                        3;
+    
+                    const card =
+                        data.card;
+    
+                    if(!card){
+    
+                        return;
+    
+                    }
+    
+                    anchor.getWorldPosition(
+                        projected
+                    );
+    
+                    projected.project(
+                        camera
+                    );
+    
+                    const visible =
+                        projected.z >= -1 &&
+                        projected.z <= 1 &&
+                        projected.x >= -1.2 &&
+                        projected.x <= 1.2 &&
+                        projected.y >= -1.2 &&
+                        projected.y <= 1.2;
+    
+                    if(!visible){
+    
+                        card.style.display =
+                            "none";
+    
+                        return;
+    
+                    }
+    
+                    const x =
+                        (
+                            projected.x *
+                            0.5 +
+                            0.5
+                        ) *
+                        window.innerWidth;
+    
+                    const y =
+                        (
+                            -projected.y *
+                            0.5 +
+                            0.5
+                        ) *
+                        window.innerHeight;
+    
+                    const distance =
+                        camera.position.distanceTo(
+                            projectedWorld(anchor)
+                        );
+    
+                    const scale =
+                        Math.max(
+                            0.62,
+                            Math.min(
+                                1.15,
+                                420 / distance
+                            )
+                        );
+    
                     card.style.display =
-                        "none";
-
-                    return;
-
+                        "block";
+    
+                    card.style.transform =
+                        `translate(${x - 72.5}px, ${y - 62}px) scale(${scale})`;
+    
+                    card.style.zIndex =
+                        String(
+                            5000 -
+                            Math.floor(
+                                distance
+                            )
+                        );
+    
                 }
-
-                const x =
+            );
+        }
+    
+        sparkleGroup.children.forEach(
+            function(sparkle){
+    
+                sparkle.material.opacity =
+                    0.3 +
                     (
-                        projected.x *
-                        0.5 +
-                        0.5
-                    ) *
-                    window.innerWidth;
-
-                const y =
-                    (
-                        -projected.y *
-                        0.5 +
-                        0.5
-                    ) *
-                    window.innerHeight;
-
-                const distance =
-                    camera.position.distanceTo(
-                        projectedWorld(anchor)
-                    );
-
-                const scale =
-                    Math.max(
-                        0.62,
-                        Math.min(
-                            1.15,
-                            420 / distance
-                        )
-                    );
-
-                card.style.display =
-                    "block";
-
-                card.style.transform =
-                    `translate(${x - 72.5}px, ${y - 62}px) scale(${scale})`;
-
-                card.style.zIndex =
-                    String(
-                        5000 -
-                        Math.floor(
-                            distance
-                        )
-                    );
-
+                        Math.sin(
+                            time * 1.7 +
+                            sparkle.userData.offset
+                        ) + 1
+                    ) * 0.3;
+    
             }
         );
+    
+        renderer.render(
+            scene,
+            camera
+        );
     }
-
-    sparkleGroup.children.forEach(
-        function(sparkle){
-
-            sparkle.material.opacity =
-                0.3 +
-                (
-                    Math.sin(
-                        time * 1.7 +
-                        sparkle.userData.offset
-                    ) + 1
-                ) * 0.3;
-
+    
+    
+    /* =========================================================
+       RESIZE
+    ========================================================= */
+    
+    window.addEventListener(
+        "resize",
+        function(){
+    
+            if(
+                !camera ||
+                !renderer
+            ){
+    
+                return;
+    
+            }
+    
+            camera.aspect =
+                window.innerWidth /
+                window.innerHeight;
+    
+            camera.updateProjectionMatrix();
+    
+            renderer.setSize(
+                window.innerWidth,
+                window.innerHeight
+            );
+    
+            renderer.setPixelRatio(
+                Math.min(
+                    window.devicePixelRatio || 1,
+                    1.25
+                )
+            );
+    
         }
     );
-
-    renderer.render(
-        scene,
-        camera
-    );
-}
-
-
-/* =========================================================
-   RESIZE
-========================================================= */
-
-window.addEventListener(
-    "resize",
-    function(){
-
-        if(
-            !camera ||
-            !renderer
-        ){
-
-            return;
-
-        }
-
-        camera.aspect =
-            window.innerWidth /
-            window.innerHeight;
-
-        camera.updateProjectionMatrix();
-
-        renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
-        );
-
-        renderer.setPixelRatio(
-            Math.min(
-                window.devicePixelRatio || 1,
-                1.25
-            )
-        );
-
-    }
-);
-
-</script>
-
-</body>
-</html>
+    
+    </script>
+    
+    </body>
+    </html>
