@@ -290,6 +290,44 @@ html,body{
     background:#24102f;
 
     border:1px solid rgba(220,160,255,.3);
+    .password-box{
+    position:relative;
+    width:100%;
+}
+
+.password-box #pin{
+    padding-right:55px;
+}
+
+.toggle-password{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+
+    width:42px;
+    height:42px;
+
+    border:none;
+    border-radius:12px;
+
+    background:rgba(255,255,255,.08);
+    color:#fff;
+
+    font-size:20px;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    transition:.2s;
+}
+
+.toggle-password:hover{
+    background:rgba(255,255,255,.16);
+}    
 }
 
 #unlock{
@@ -784,12 +822,25 @@ html,body{
             Pero primero tienes que descubrir la fecha importante.
         </p>
 
-        <input
-            id="pin"
-            type="password"
-            maxlength="8"
-            placeholder="••/••/••••"
-        >
+<div class="password-box">
+
+    <input
+        id="pin"
+        type="password"
+        maxlength="20"
+        placeholder="••/••/••••"
+    >
+
+    <button
+        type="button"
+        id="togglePassword"
+        class="toggle-password"
+        aria-label="Mostrar contraseña"
+    >
+        👁️
+    </button>
+
+</div>
 
         <button id="unlock">
             🔓 Abrir
@@ -1142,6 +1193,36 @@ let photoGroup = null;
 let sparkleGroup = null;
 
 let initialized = false;
+
+    /* =========================================================
+   MOSTRAR / OCULTAR CONTRASEÑA
+========================================================= */
+
+const togglePassword =
+    document.getElementById("togglePassword");
+
+togglePassword.addEventListener(
+    "click",
+    function(){
+
+        if(pin.type === "password"){
+
+            pin.type = "text";
+
+            togglePassword.textContent =
+                "🙈";
+
+        }else{
+
+            pin.type = "password";
+
+            togglePassword.textContent =
+                "👁️";
+
+        }
+
+    }
+);
 
 
 /* =========================================================
