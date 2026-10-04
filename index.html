@@ -2,999 +2,299 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Un pequeño universo para ti 💜</title>
-
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    user-select:none;
-    -webkit-user-select:none;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#020004;
-    font-family:Arial,Helvetica,sans-serif;
-    color:white;
-}
-
-/* =========================================================
-   CANVAS
-========================================================= */
-
-#canvas{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    display:block;
-
-    opacity:0;
-    visibility:hidden;
-
-    transition:opacity .8s ease;
-    z-index:1;
-}
-
-#canvas.visible{
-    opacity:1;
-    visibility:visible;
-}
-
-/* =========================================================
-   CANDADO
-========================================================= */
-
-#intro{
-    position:fixed;
-    inset:0;
-    z-index:3000;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    background:
-        radial-gradient(
-            circle at center,
-            #180625 0%,
-            #09000e 55%,
-            #020004 100%
-        );
-
-    opacity:1;
-    visibility:visible;
-
-    transition:
-        opacity .9s ease,
-        visibility .9s ease;
-}
-
-#introVideo{
-    position:absolute;
-    inset:0;
-
-    width:100%;
-    height:100%;
-
-    object-fit:cover;
-
-    z-index:0;
-    pointer-events:none;
-}
-
-#intro::after{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background:rgba(20,0,35,.45);
-
-    z-index:1;
-    pointer-events:none;
-}
-
-#intro .intro-box{
-    position:relative;
-    z-index:2;
-}
-
-#intro.hide{
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-}
-
-.intro-box{
-    position:relative;
-
-    width:min(430px,90%);
-    padding:40px 25px;
-
-    text-align:center;
-
-    border-radius:30px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,.16),
-            rgba(255,255,255,.05)
-        );
-
-    border:1px solid rgba(255,255,255,.35);
-
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
-
-    box-shadow:
-        0 8px 40px rgba(0,0,0,.45),
-        0 0 45px rgba(168,85,247,.25),
-        inset 0 1px 1px rgba(255,255,255,.25);
-
-    overflow:hidden;
-}
-
-.intro-box::before{
-    content:"";
-
-    position:absolute;
-
-    top:0;
-    left:-100%;
-
-    width:70%;
-    height:100%;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,.18),
-            transparent
-        );
-
-    transform:skewX(-20deg);
-
-    animation:glassShine 5s ease-in-out infinite;
-
-    pointer-events:none;
-}
-
-@keyframes glassShine{
-    0%{
-        left:-100%;
-    }
-
-    45%,100%{
-        left:150%;
-    }
-}
-
-.lock{
-    font-size:75px;
-    margin-bottom:20px;
-
-    filter:
-        drop-shadow(0 0 10px #a855f7)
-        drop-shadow(0 0 30px #7e22ce);
-
-    animation:floatLock 2.5s ease-in-out infinite;
-}
-
-@keyframes floatLock{
-    0%,100%{
-        transform:translateY(0);
-    }
-
-    50%{
-        transform:translateY(-10px);
-    }
-}
-
-.lock.unlocking{
-    animation:
-        unlockShake .35s ease,
-        lockGlow .8s ease forwards;
-}
-
-@keyframes unlockShake{
-    0%{
-        transform:scale(1) rotate(0);
-    }
-
-    25%{
-        transform:scale(1.15) rotate(-8deg);
-    }
-
-    50%{
-        transform:scale(1.2) rotate(8deg);
-    }
-
-    75%{
-        transform:scale(1.15) rotate(-4deg);
-    }
-
-    100%{
-        transform:scale(1) rotate(0);
-    }
-}
-
-@keyframes lockGlow{
-    0%{
-        filter:
-            drop-shadow(0 0 10px #a855f7)
-            drop-shadow(0 0 30px #7e22ce);
-    }
-
-    50%{
-        filter:
-            drop-shadow(0 0 30px #ffffff)
-            drop-shadow(0 0 70px #d946ef);
-    }
-
-    100%{
-        filter:
-            drop-shadow(0 0 10px #a855f7)
-            drop-shadow(0 0 30px #7e22ce);
-    }
-}
-
-#intro.unlockFlash::after{
-    animation:unlockFlash .7s ease;
-}
-
-@keyframes unlockFlash{
-    0%{
-        background:rgba(20,0,35,.45);
-    }
-
-    50%{
-        background:rgba(255,180,255,.08);
-    }
-
-    100%{
-        background:rgba(20,0,35,.45);
-    }
-}
-
-.intro-box h1{
-    font-size:clamp(25px,6vw,38px);
-    margin-bottom:10px;
-}
-
-.intro-box p{
-    opacity:.7;
-    margin-bottom:25px;
-}
-
-#pin{
-    width:100%;
-    height:52px;
-
-    border:none;
-    outline:none;
-    border-radius:15px;
-
-    text-align:center;
-    font-size:22px;
-    letter-spacing:8px;
-
-    color:white;
-    background:#24102f;
-
-    border:1px solid rgba(220,160,255,.3);
-}
-
-#unlock{
-    width:100%;
-    height:52px;
-
-    margin-top:15px;
-
-    border:none;
-    border-radius:15px;
-
-    color:white;
-
-    font-size:16px;
-    font-weight:bold;
-
-    cursor:pointer;
-
-    background:
-        linear-gradient(
-            135deg,
-            #7c2ae8,
-            #c05cff
-        );
-
-    box-shadow:
-        0 0 25px rgba(168,85,247,.4);
-}
-
-#error{
-    min-height:20px;
-    margin-top:12px;
-    color:#ff9ddc;
-    font-size:14px;
-}
-
-/* =========================================================
-   BIENVENIDA
-========================================================= */
-
-#welcome{
-    position:fixed;
-    inset:0;
-
-    z-index:2500;
-
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(100,25,150,.35),
-            #0a0010 60%,
-            #030006 100%
-        );
-
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-
-    transition:opacity .8s ease;
-}
-
-#welcome.show{
-    opacity:1;
-    visibility:visible;
-    pointer-events:auto;
-}
-
-.welcome-video-container{
-    width:min(520px,80vw);
-    height:min(300px,45vw);
-
-    margin-bottom:10px;
-    padding:6px;
-
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #7e22ce,
-            #d946ef,
-            #a855f7
-        );
-
-    box-shadow:
-        0 0 20px rgba(217,70,239,.55),
-        0 0 45px rgba(147,51,234,.3);
-}
-
-.welcome-video{
-    display:block;
-
-    width:100%;
-    height:100%;
-
-    object-fit:cover;
-
-    border-radius:16px;
-    background:#050008;
-}
-
-#welcome h1{
-    margin-top:15px;
-
-    font-size:clamp(35px,8vw,65px);
-
-    text-shadow:
-        0 0 10px #c084fc,
-        0 0 30px #a855f7;
-}
-
-#welcome p{
-    margin-top:10px;
-    opacity:.75;
-    font-size:18px;
-}
-
-#enterUniverse{
-    margin-top:30px;
-
-    padding:15px 32px;
-
-    border:none;
-    border-radius:30px;
-
-    color:white;
-
-    background:
-        linear-gradient(
-            135deg,
-            #7e22ce,
-            #c026d3
-        );
-
-    box-shadow:
-        0 0 30px rgba(192,38,211,.5);
-
-    cursor:pointer;
-
-    font-size:16px;
-    font-weight:bold;
-
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease;
-}
-
-#enterUniverse:hover{
-    transform:scale(1.05);
-
-    box-shadow:
-        0 0 45px rgba(217,70,239,.75);
-}
-
-/* =========================================================
-   HUD
-========================================================= */
-
-#title{
-    position:fixed;
-
-    top:24px;
-    left:50%;
-
-    transform:translateX(-50%);
-
-    z-index:100;
-
-    width:90%;
-
-    text-align:center;
-
-    font-size:clamp(24px,5vw,48px);
-
-    text-shadow:
-        0 0 10px #c084fc,
-        0 0 30px #9333ea;
-
-    pointer-events:none;
-
-    opacity:0;
-
-    transition:opacity 1.2s ease;
-}
-
-#title.visible{
-    opacity:1;
-}
-
-#hint{
-    position:fixed;
-
-    top:82px;
-    left:50%;
-
-    transform:translateX(-50%);
-
-    z-index:100;
-
-    width:90%;
-
-    text-align:center;
-
-    font-size:13px;
-
-    color:#eadcff;
-
-    opacity:0;
-
-    transition:opacity 1.2s ease;
-
-    pointer-events:none;
-}
-
-#hint.visible{
-    opacity:.6;
-}
-
-/* =========================================================
-   CARTA
-========================================================= */
-
-#letterButton{
-    position:fixed;
-
-    bottom:25px;
-    left:50%;
-
-    transform:translateX(-50%);
-
-    z-index:150;
-
-    padding:14px 25px;
-
-    border:none;
-    border-radius:30px;
-
-    color:white;
-    font-weight:bold;
-
-    cursor:pointer;
-
-    background:
-        linear-gradient(
-            135deg,
-            #7e22ce,
-            #d946ef
-        );
-
-    box-shadow:
-        0 0 25px rgba(217,70,239,.45);
-
-    opacity:0;
-    pointer-events:none;
-
-    transition:
-        opacity 1.2s ease,
-        transform .25s ease;
-}
-
-#letterButton.visible{
-    opacity:1;
-    pointer-events:auto;
-}
-
-#letterButton:hover{
-    transform:translateX(-50%) scale(1.05);
-}
-
-/* =========================================================
-   MODALES
-========================================================= */
-
-.modal{
-    position:fixed;
-    inset:0;
-
-    z-index:5000;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    padding:20px;
-
-    background:rgba(5,0,10,.88);
-
-    backdrop-filter:blur(8px);
-}
-
-.modal.show{
-    display:flex;
-}
-
-.modal-card{
-    position:relative;
-
-    width:min(680px,94vw);
-
-    max-height:85vh;
-
-    overflow:auto;
-
-    padding:35px;
-
-    border-radius:28px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #21082d,
-            #100316
-        );
-
-    border:1px solid rgba(220,170,255,.45);
-
-    box-shadow:
-        0 0 60px rgba(168,85,247,.35);
-}
-
-.modal-card img{
-    width:100%;
-    max-height:400px;
-
-    object-fit:contain;
-
-    border-radius:20px;
-    margin-bottom:20px;
-}
-
-.close{
-    position:absolute;
-
-    top:10px;
-    right:15px;
-
-    width:40px;
-    height:40px;
-
-    border:none;
-    border-radius:50%;
-
-    background:#32133f;
-    color:white;
-
-    font-size:25px;
-    cursor:pointer;
-}
-
-.modal-card h2{
-    margin-bottom:12px;
-    color:#e9b6ff;
-}
-
-.modal-card p{
-    line-height:1.7;
-    white-space:pre-line;
-    opacity:.85;
-}
-
-.letter h2{
-    text-align:center;
-    margin-bottom:25px;
-
-    font-size:32px;
-    color:#f0b7ff;
-}
-
-.letter-content{
-    font-family:Georgia,serif;
-
-    font-size:18px;
-    line-height:1.9;
-
-    white-space:pre-line;
-
-    color:#f5e7ff;
-}
-
-/* =========================================================
-   ERROR THREE
-========================================================= */
-
-#threeError{
-    position:fixed;
-    inset:0;
-
-    z-index:10000;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-
-    padding:30px;
-
-    background:#020004;
-}
-
-#threeError.show{
-    display:flex;
-}
-
-.three-error-box{
-    max-width:500px;
-}
-
-.three-error-box h2{
-    color:#d8a7ff;
-    margin-bottom:15px;
-}
-
-.three-error-box p{
-    opacity:.75;
-    line-height:1.6;
-}
-
-/* =========================================================
-   MÓVIL
-========================================================= */
-
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#020004;color:#fff;font-family:Arial,Helvetica,sans-serif}
+#canvas{position:fixed;inset:0;width:100%;height:100%;display:block;opacity:0;visibility:hidden;transition:opacity .8s;z-index:1}
+#canvas.visible{opacity:1;visibility:visible}
+#intro,#welcome{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center}
+#intro{z-index:3000;background:radial-gradient(circle,#180625 0%,#09000e 55%,#020004 100%);transition:opacity .9s,visibility .9s}
+#intro.hide{opacity:0;visibility:hidden;pointer-events:none}
+#introVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
+#intro:after{content:"";position:absolute;inset:0;background:rgba(20,0,35,.45);z-index:1}
+.intro-box{position:relative;z-index:2;width:min(430px,90%);padding:40px 25px;border-radius:30px;text-align:center;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(18px);box-shadow:0 8px 40px rgba(0,0,0,.45),0 0 45px rgba(168,85,247,.25),inset 0 1px 1px rgba(255,255,255,.25);overflow:hidden}
+.lock{font-size:75px;margin-bottom:20px;filter:drop-shadow(0 0 10px #a855f7) drop-shadow(0 0 30px #7e22ce);animation:lockFloat 2.5s ease-in-out infinite}
+@keyframes lockFloat{50%{transform:translateY(-10px)}}
+.intro-box h1{font-size:clamp(25px,6vw,38px);margin-bottom:10px}.intro-box p{opacity:.7;margin-bottom:25px}
+#pin{width:100%;height:52px;border:1px solid rgba(220,160,255,.3);outline:0;border-radius:15px;text-align:center;font-size:22px;letter-spacing:8px;color:#fff;background:#24102f}
+#unlock,#enterUniverse,#letterButton{border:0;color:#fff;font-weight:700;cursor:pointer}
+#unlock{width:100%;height:52px;margin-top:15px;border-radius:15px;background:linear-gradient(135deg,#7c2ae8,#c05cff);box-shadow:0 0 25px rgba(168,85,247,.4)}
+#error{min-height:20px;margin-top:12px;color:#ff9ddc;font-size:14px}
+#welcome{z-index:2500;flex-direction:column;background:radial-gradient(circle,rgba(100,25,150,.35),#0a0010 60%,#030006 100%);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .8s}
+#welcome.show{opacity:1;visibility:visible;pointer-events:auto}
+.welcome-video-container{width:min(520px,80vw);height:min(300px,45vw);padding:6px;margin-bottom:10px;border-radius:22px;background:linear-gradient(135deg,#7e22ce,#d946ef,#a855f7);box-shadow:0 0 20px rgba(217,70,239,.55),0 0 45px rgba(147,51,234,.3)}
+.welcome-video{width:100%;height:100%;display:block;object-fit:cover;border-radius:16px;background:#050008}
+#welcome h1{margin-top:15px;font-size:clamp(35px,8vw,65px);text-shadow:0 0 10px #c084fc,0 0 30px #a855f7}
+#welcome p{margin-top:10px;opacity:.75;font-size:18px}
+#enterUniverse{margin-top:30px;padding:15px 32px;border-radius:30px;font-size:16px;background:linear-gradient(135deg,#7e22ce,#c026d3);box-shadow:0 0 30px rgba(192,38,211,.5)}
+#title{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:100;width:90%;text-align:center;font-size:clamp(24px,5vw,48px);text-shadow:0 0 10px #c084fc,0 0 30px #9333ea;pointer-events:none;opacity:0;transition:opacity 1.2s}
+#title.visible{opacity:1}
+#hint{position:fixed;top:82px;left:50%;transform:translateX(-50%);z-index:100;width:90%;text-align:center;font-size:13px;color:#eadcff;opacity:0;transition:opacity 1.2s;pointer-events:none}
+#hint.visible{opacity:.6}
+#letterButton{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);z-index:200;padding:14px 25px;border-radius:30px;background:linear-gradient(135deg,#7e22ce,#d946ef);box-shadow:0 0 25px rgba(217,70,239,.45);opacity:0;pointer-events:none;transition:.25s}
+#letterButton.visible{opacity:1;pointer-events:auto}
+.modal{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,0,10,.88);backdrop-filter:blur(8px)}
+.modal.show{display:flex}
+.modal-card{position:relative;width:min(680px,94vw);max-height:85vh;overflow:auto;padding:35px;border-radius:28px;background:linear-gradient(145deg,#21082d,#100316);border:1px solid rgba(220,170,255,.45);box-shadow:0 0 60px rgba(168,85,247,.35)}
+.modal-card img{width:100%;max-height:400px;object-fit:contain;border-radius:20px;margin-bottom:20px}
+.close{position:absolute;top:10px;right:15px;width:40px;height:40px;border:0;border-radius:50%;background:#32133f;color:#fff;font-size:25px;cursor:pointer}
+.modal-card h2{margin-bottom:12px;color:#e9b6ff}
+.modal-card p{line-height:1.7;white-space:pre-line;opacity:.85}
+.letter h2{text-align:center;margin-bottom:25px;font-size:32px}
+.letter-content{white-space:pre-line;line-height:1.9;text-align:left;color:#f6e9ff;font-size:16px}
+#visualOverlay{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:visible}
+.photo-card{position:absolute;left:0;top:0;width:145px;padding:7px;border-radius:17px;background:linear-gradient(145deg,rgba(48,10,68,.96),rgba(18,2,28,.96));border:1px solid rgba(225,180,255,.65);box-shadow:0 0 24px rgba(168,85,247,.3);pointer-events:auto;cursor:pointer;transform-origin:center;will-change:transform}
+.photo-card img{display:block;width:100%;height:105px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:#1b0627}
+.photo-card .photo-title{margin-top:7px;padding:0 4px 3px;text-align:center;color:#f4ddff;font:bold 12px Arial;line-height:1.25;text-shadow:0 0 8px rgba(192,132,252,.7)}
+#heartAura{position:absolute;left:50%;top:50%;width:300px;height:300px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,225,255,.25) 0%,rgba(236,72,244,.38) 18%,rgba(192,38,211,.22) 38%,rgba(126,34,206,.1) 58%,transparent 78%);filter:blur(12px);pointer-events:none;z-index:5450}
+#heartOverlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:220px;line-height:1;color:#c026ff;text-shadow:0 0 10px #fff,0 0 24px #f0abff,0 0 55px #c026ff,0 0 95px #7e22ce;pointer-events:none;z-index:5550}
+#threeError{position:fixed;inset:0;z-index:6000;display:none;align-items:center;justify-content:center;text-align:center;background:#08000d;padding:30px}
+.three-error-box{max-width:500px}
+.three-error-box h2{color:#d8a7ff;margin-bottom:15px}
+.three-error-box p{opacity:.75;line-height:1.6}
 @media(max-width:600px){
-
-    .intro-box{
-        padding:30px 20px;
-    }
-
-    #title{
-        top:18px;
-    }
-
-    #hint{
-        top:67px;
-    }
-
-    #letterButton{
-        bottom:15px;
-    }
-
-    .modal-card{
-        padding:25px 20px;
-    }
+.intro-box{padding:30px 20px}
+#title{top:18px}
+#hint{top:67px}
+#letterButton{bottom:15px}
+.modal-card{padding:25px 20px}
+#heartOverlay{font-size:170px}
+.photo-card{width:122px}
+.photo-card img{height:86px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- CANVAS -->
 <canvas id="canvas"></canvas>
 
-<!-- TITULO -->
-<h1 id="title">
-    Un pequeño universo para ti 💜
-</h1>
+<h1 id="title"></h1>
 
 <div id="hint">
-    Arrastra para explorar · rueda para acercar · toca las imágenes ✨
+Arrastra para explorar · rueda para acercar · toca las imágenes ✨
 </div>
-
-<!-- =====================================================
-     CANDADO
-===================================================== -->
 
 <div id="intro">
 
-    <video id="introVideo" autoplay muted loop playsinline>
-        <source src="2.mp4" type="video/mp4">
-    </video>
+<video id="introVideo" autoplay muted loop playsinline>
+<source src="2.mp4" type="video/mp4">
+</video>
 
-    <div class="intro-box">
+<div class="intro-box">
 
-        <div class="lock" id="lockIcon">
-            🔒
-        </div>
-
-        <h1>
-            Hay algo para ti ANITA🌸
-        </h1>
-
-        <p>
-            Pero primero tienes que descubrir el código.
-        </p>
-
-        <input
-            id="pin"
-            type="password"
-            maxlength="8"
-            placeholder="••••"
-        >
-
-        <button id="unlock">
-            🔓 Abrir
-        </button>
-
-        <div id="error"></div>
-
-    </div>
-
+<div class="lock" id="lockIcon">
+🔒
 </div>
 
-<!-- =====================================================
-     BIENVENIDA
-===================================================== -->
+<h1>
+Hay algo para ti ANITA🌸
+</h1>
+
+<p>
+Pero primero tienes que descubrir el código.
+</p>
+
+<input
+id="pin"
+type="password"
+maxlength="8"
+placeholder="••••"
+>
+
+<button id="unlock">
+🔓 Abrir
+</button>
+
+<div id="error"></div>
+
+</div>
+</div>
+
 
 <div id="welcome">
 
-    <div class="welcome-video-container">
+<div class="welcome-video-container">
 
-        <video
-            class="welcome-video"
-            autoplay
-            muted
-            loop
-            playsinline
-        >
-            <source src="./1.mp4" type="video/mp4">
-        </video>
+<video
+class="welcome-video"
+autoplay
+muted
+loop
+playsinline
+>
 
-    </div>
+<source src="1.mp4" type="video/mp4">
 
-    <h1>
-        Hola,
-        <span id="personName">
-            Anita🌸
-        </span>
-    </h1>
-
-    <p>
-        Preparé un pequeño lugar para ti.
-    </p>
-
-    <button id="enterUniverse">
-        ✨ Entrar a mi universo
-    </button>
+</video>
 
 </div>
 
-<!-- =====================================================
-     BOTÓN CARTA
-===================================================== -->
+<h1>
+Hola,
+<span id="personName">
+Anita🌸
+</span>
+</h1>
 
-<button id="letterButton">
-    💌 Hay algo más para ti...
+<p>
+Preparé un pequeño lugar para ti.
+</p>
+
+<button id="enterUniverse">
+✨ Entrar a mi universo
 </button>
 
-<!-- =====================================================
-     MODAL FOTO
-===================================================== -->
+</div>
+
+
+<button id="letterButton">
+💌 Hay algo más para ti...
+</button>
+
 
 <div id="photoModal" class="modal">
 
-    <div class="modal-card">
+<div class="modal-card">
 
-        <button class="close" id="photoClose">
-            ×
-        </button>
+<button class="close" id="photoClose">
+×
+</button>
 
-        <img
-            id="modalImage"
-            src=""
-            alt="Imagen"
-        >
+<img
+id="modalImage"
+src=""
+alt="Imagen"
+>
 
-        <h2 id="modalTitle">
-            Para ti 💜
-        </h2>
+<h2 id="modalTitle">
+Para ti 💜
+</h2>
 
-        <p id="modalText"></p>
-
-    </div>
+<p id="modalText"></p>
 
 </div>
 
-<!-- =====================================================
-     MODAL CARTA
-===================================================== -->
+</div>
+
 
 <div id="letterModal" class="modal">
 
-    <div class="modal-card letter">
+<div class="modal-card letter">
 
-        <button class="close" id="letterClose">
-            ×
-        </button>
+<button class="close" id="letterClose">
+×
+</button>
 
-        <h2>
-            💌 Una carta para ti
-        </h2>
+<h2>
+💌 Una carta para ti
+</h2>
 
-        <div
-            id="letterContent"
-            class="letter-content"
-        ></div>
-
-    </div>
+<div
+id="letterContent"
+class="letter-content"
+></div>
 
 </div>
 
-<!-- =====================================================
-     ERROR THREE
-===================================================== -->
+</div>
+
 
 <div id="threeError">
 
-    <div class="three-error-box">
+<div class="three-error-box">
 
-        <h2>
-            No se pudo cargar el universo 💜
-        </h2>
+<h2>
+No se pudo cargar el universo 💜
+</h2>
 
-        <p>
-            La página necesita cargar Three.js desde Internet.
-            Revisa tu conexión y vuelve a abrir el archivo.
-        </p>
-
-    </div>
+<p>
+La página necesita cargar Three.js desde Internet.
+Revisa tu conexión y vuelve a abrir el archivo.
+</p>
 
 </div>
 
-<!-- =====================================================
-     MÚSICA
-===================================================== -->
+</div>
+
 
 <audio id="music" loop>
-    <source src="3.mp3" type="audio/mpeg">
-</audio>
 
-<!-- =====================================================
-     THREE.JS
-===================================================== -->
+<source src="3.mp3" type="audio/mpeg">
+
+</audio>
 
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
 
 <script>
 
-/* =========================================================
-   CONFIGURACIÓN
-========================================================= */
-
 const CONFIG = {
 
-    codigo:"1234",
+codigo:"1234",
 
-    nombre:"Anita🌸",
+nombre:"Anita🌸",
 
-    titulo:"Un pequeño universo para ti 🌸💜",
+titulo:"Un pequeño universo para ti 🌸💜",
 
-    fotos:[
-    {
-        imagen:"tulipanes.jpg",
-        titulo:"Tulipán morado — Amor eterno 💜",
-        texto:"Dicen que los tulipanes representan un amor que no necesita ser perfecto para ser verdadero. Y quizás eso es lo que siento por ti: un cariño que crece poco a poco, que permanece incluso cuando pasan los días."
-    },
-    {
-        imagen:"rosas.jpg",
-        titulo:"Rosa morada — Admiración 🌸",
-        texto:"Una rosa puede ser hermosa, pero hay personas que hacen que cualquier flor parezca pequeña. Tú tienes esa forma especial de hacer que mis días sean diferentes sin siquiera intentarlo. Y si alguna vez me preguntaran qué es lo que más admiro de ti, probablemente no encontraría una sola respuesta."
-    },
-    {
-        imagen:"lavanda.jpg",
-        titulo:"Lavanda — Paz y tranquilidad 💜",
-        texto:"La lavanda representa tranquilidad, y cuando pienso en ti entiendo por qué. Hay personas que llegan a nuestra vida haciendo ruido, pero tú llegaste de una manera diferente. Contigo descubrí que también existe un amor que se siente como estar en casa, como encontrar paz en medio de todo."
-    },
-    {
-        imagen:"orquidea.jpg",
-        titulo:"Orquídea morada — Belleza única 🌸",
-        texto:"Las orquídeas son flores especiales, y quizás por eso me recuerdan a ti. No porque seas perfecta, sino porque tienes algo que no encuentro en nadie más. Entre tantas personas, tantos lugares y tantos momentos, de alguna manera mi corazón siempre termina encontrando el camino hacia ti."
-    },
-    {
-        imagen:"violeta.jpg",
-        titulo:"Violeta — Fidelidad 💜",
-        texto:"Las violetas pueden parecer pequeñas, pero esconden una belleza que se descubre cuando realmente las miras. Creo que algunas personas son así. No necesitan llamar la atención para convertirse en alguien importante. Simplemente llegan, se quedan en nuestros pensamientos y terminan ocupando un lugar que nadie más puede reemplazar."
-    },
-    {
-        imagen:"loto.jpg",
-        titulo:"Loto morado — Un nuevo comienzo 🌸",
-        texto:"El loto nace incluso después de atravesar el agua y la oscuridad, y por eso me recuerda que las cosas bonitas también pueden aparecer después de momentos difíciles. Quizás eso sea lo más hermoso del amor: encontrar a alguien que convierta un momento cualquiera en el comienzo de algo que jamás imaginaste vivir."
-    },
-    {
-        imagen:"jacinto.jpg",
-        titulo:"Jacinto morado — Cariño 💜",
-        texto:"Quizás no pueda prometerte que todos los días serán perfectos, pero sí puedo decirte que hay algo que nunca cambiaría: las ganas de seguir compartiendo momentos contigo. Porque cuando alguien realmente importa, no quieres solamente los días bonitos; quieres estar también cuando llegue la lluvia."
-    },
-    {
-        imagen:"hortensia.jpg",
-        titulo:"Hortensia morada — Sentimientos sinceros 🌸",
-        texto:"Hay sentimientos que no necesitan grandes palabras para existir. A veces están en una mirada, en una sonrisa o en esos pequeños momentos que parecen insignificantes, pero que terminamos recordando durante mucho tiempo. Gracias por ser una de esas personas que hacen que los pequeños momentos se vuelvan inolvidables."
-    }
+fotos:[
+
+{
+imagen:"tulipanes.jpg",
+titulo:"Tulipán morado — Amor eterno 💜",
+texto:"Dicen que los tulipanes representan un amor que no necesita ser perfecto para ser verdadero. Y quizás eso es lo que siento por ti: un cariño que crece poco a poco, que permanece incluso cuando pasan los días."
+},
+
+{
+imagen:"rosas.jpg",
+titulo:"Rosa morada — Admiración 🌸",
+texto:"Una rosa puede ser hermosa, pero hay personas que hacen que cualquier flor parezca pequeña. Tú tienes esa forma especial de hacer que mis días sean diferentes sin siquiera intentarlo."
+},
+
+{
+imagen:"lavanda.jpg",
+titulo:"Lavanda — Paz y tranquilidad 💜",
+texto:"La lavanda representa tranquilidad. Hay personas que llegan a nuestra vida haciendo ruido, pero tú llegaste de una manera diferente. Contigo descubrí que también existe un amor que se siente como estar en casa."
+},
+
+{
+imagen:"orquidea.jpg",
+titulo:"Orquídea morada — Belleza única 🌸",
+texto:"Las orquídeas son flores especiales, y quizás por eso me recuerdan a ti. No porque seas perfecta, sino porque tienes algo que no encuentro en nadie más."
+},
+
+{
+imagen:"violeta.jpg",
+titulo:"Violeta — Fidelidad 💜",
+texto:"Las violetas pueden parecer pequeñas, pero esconden una belleza que se descubre cuando realmente las miras. No necesitan llamar la atención para convertirse en alguien importante."
+},
+
+{
+imagen:"loto.jpg",
+titulo:"Loto morado — Un nuevo comienzo 🌸",
+texto:"El loto nace incluso después de atravesar el agua y la oscuridad, y por eso me recuerda que las cosas bonitas también pueden aparecer después de momentos difíciles."
+},
+
+{
+imagen:"jacinto.jpg",
+titulo:"Jacinto morado — Cariño 💜",
+texto:"Quizás no pueda prometerte que todos los días serán perfectos, pero sí puedo decirte que hay algo que nunca cambiaría: las ganas de seguir compartiendo momentos contigo."
+},
+
+{
+imagen:"hortensia.jpg",
+titulo:"Hortensia morada — Sentimientos sinceros 🌸",
+texto:"Hay sentimientos que no necesitan grandes palabras para existir. A veces están en una mirada, en una sonrisa o en esos pequeños momentos que parecen insignificantes, pero que terminamos recordando durante mucho tiempo."
+}
+
 ],
 
-    carta:
-        Una noche para recordar🌙✨
-    Para una persona que hizo especial lo inesperado🪻🦋   
+carta:`Una noche para recordar 🌙💜✨
+
+Para una persona que hizo especial lo inesperado 🪻🦋
+
 Quizás algunas historias
 comienzan una noche cualquiera,
 cuando dos personas coinciden
@@ -1035,2280 +335,1410 @@ y encuentras una estrella entre miles,
 piensa que quizá así te veo yo:
 
 una entre millones,
-pero imposible de reemplazar. 💜    
+pero imposible de reemplazar. 💜`
+
 };
 
 
-/* =========================================================
-   ELEMENTOS
-========================================================= */
-
 const intro =
-    document.getElementById("intro");
+document.getElementById("intro");
 
 const pin =
-    document.getElementById("pin");
+document.getElementById("pin");
 
 const unlock =
-    document.getElementById("unlock");
+document.getElementById("unlock");
 
 const error =
-    document.getElementById("error");
+document.getElementById("error");
 
 const welcome =
-    document.getElementById("welcome");
+document.getElementById("welcome");
 
 const personName =
-    document.getElementById("personName");
+document.getElementById("personName");
 
 const enterUniverse =
-    document.getElementById("enterUniverse");
+document.getElementById("enterUniverse");
 
 const canvas =
-    document.getElementById("canvas");
+document.getElementById("canvas");
 
 const title =
-    document.getElementById("title");
+document.getElementById("title");
 
 const hint =
-    document.getElementById("hint");
+document.getElementById("hint");
 
 const letterButton =
-    document.getElementById("letterButton");
+document.getElementById("letterButton");
 
 const letterModal =
-    document.getElementById("letterModal");
+document.getElementById("letterModal");
 
 const letterClose =
-    document.getElementById("letterClose");
+document.getElementById("letterClose");
 
 const letterContent =
-    document.getElementById("letterContent");
+document.getElementById("letterContent");
 
 const photoModal =
-    document.getElementById("photoModal");
+document.getElementById("photoModal");
 
 const photoClose =
-    document.getElementById("photoClose");
+document.getElementById("photoClose");
 
 const modalImage =
-    document.getElementById("modalImage");
+document.getElementById("modalImage");
 
 const modalTitle =
-    document.getElementById("modalTitle");
+document.getElementById("modalTitle");
 
 const modalText =
-    document.getElementById("modalText");
+document.getElementById("modalText");
 
 const music =
-    document.getElementById("music");
+document.getElementById("music");
 
 const threeError =
-    document.getElementById("threeError");
+document.getElementById("threeError");
 
 
 personName.textContent =
-    CONFIG.nombre;
+CONFIG.nombre;
 
 title.textContent =
-    CONFIG.titulo;
+CONFIG.titulo;
 
 letterContent.textContent =
-    CONFIG.carta;
+CONFIG.carta;
 
 
-/* =========================================================
-   VARIABLES THREE
-========================================================= */
+let renderer,
+scene,
+camera,
+galaxy,
+stars,
+dust,
+sparkleGroup,
+photoGroup,
+initialized=false,
+dragging=false,
+prevX=0,
+prevY=0,
+targetY=0,
+currentY=0,
+targetX=.04,
+currentX=.04,
+targetZoom=420;
 
-let renderer = null;
-let scene = null;
-let camera = null;
-
-let galaxy = null;
-
-let stars = null;
-let heart = null;
-let glow = null;
-
-let ring = null;
-let ring2 = null;
-let ring3 = null;
-
-let textGroup = null;
-let photoGroup = null;
-let sparkleGroup = null;
-
-let initialized = false;
-
-
-/* =========================================================
-   CANDADO
-========================================================= */
 
 function unlockPage(){
 
-    const entered =
-        pin.value.trim();
+const entered =
+pin.value.trim();
 
-    if(entered !== CONFIG.codigo){
+if(entered !== CONFIG.codigo){
 
-        const lockIcon =
-            document.getElementById("lockIcon");
+error.textContent =
+"Código incorrecto 💜";
 
-        lockIcon.classList.remove(
-            "unlocking"
-        );
+pin.value = "";
 
-        void lockIcon.offsetWidth;
+pin.animate(
+[
+{transform:"translateX(-8px)"},
+{transform:"translateX(8px)"},
+{transform:"translateX(-8px)"},
+{transform:"translateX(0)"}
+],
+{
+duration:300
+}
+);
 
-        lockIcon.classList.add(
-            "unlocking"
-        );
+return;
 
-        setTimeout(function(){
+}
 
-            lockIcon.textContent =
-                "🔓";
+error.textContent = "";
 
-        },250);
+document.getElementById(
+"lockIcon"
+).textContent =
+"🔓";
 
-        error.textContent =
-            "Código incorrecto 💜";
+music.volume =
+0.25;
 
-        pin.value = "";
+music.play().catch(
+()=>{}
+);
 
-        pin.animate(
-            [
-                {transform:"translateX(-8px)"},
-                {transform:"translateX(8px)"},
-                {transform:"translateX(-8px)"},
-                {transform:"translateX(0)"}
-            ],
-            {
-                duration:300
-            }
-        );
+setTimeout(
+()=>{
+intro.classList.add("hide");
+},
+300
+);
 
-        return;
-    }
+setTimeout(
+()=>{
+welcome.classList.add("show");
+},
+700
+);
 
-    error.textContent = "";
-
-    const lockIcon =
-        document.getElementById("lockIcon");
-
-    lockIcon.classList.remove(
-        "unlocking"
-    );
-
-    void lockIcon.offsetWidth;
-
-    lockIcon.classList.add(
-        "unlocking"
-    );
-
-    intro.classList.add(
-        "unlockFlash"
-    );
-
-    /* MÚSICA */
-
-    music.volume = 0.25;
-
-    music.play().catch(function(){
-        console.log(
-            "El navegador bloqueó el inicio automático de la música."
-        );
-    });
-
-    setTimeout(function(){
-
-        intro.classList.add("hide");
-
-    },500);
-
-    setTimeout(function(){
-
-        welcome.classList.add("show");
-
-    },900);
 }
 
 
 unlock.addEventListener(
-    "click",
-    unlockPage
+"click",
+unlockPage
 );
 
 
 pin.addEventListener(
-    "keydown",
-    function(e){
-
-        if(e.key === "Enter"){
-            unlockPage();
-        }
-
-    }
+"keydown",
+e=>{
+if(e.key==="Enter"){
+unlockPage();
+}
+}
 );
 
 
-/* =========================================================
-   ENTRAR AL UNIVERSO
-========================================================= */
+function radialTexture(
+stops,
+size=768
+){
 
-let enteringUniverse = false;
-
-enterUniverse.addEventListener(
-    "click",
-    function(){
-
-        if(enteringUniverse){
-            return;
-        }
-
-        enteringUniverse = true;
-
-        if(!initialized){
-
-            const ok =
-                initUniverse();
-
-            if(!ok){
-
-                enteringUniverse = false;
-
-                return;
-            }
-
-            initialized = true;
-        }
-
-        canvas.classList.add(
-            "visible"
-        );
-
-        welcome.classList.remove(
-            "show"
-        );
-
-        setTimeout(function(){
-
-            title.classList.add(
-                "visible"
-            );
-
-            hint.classList.add(
-                "visible"
-            );
-
-            letterButton.classList.add(
-                "visible"
-            );
-
-            enteringUniverse = false;
-
-        },700);
-
-    }
+const c =
+document.createElement(
+"canvas"
 );
 
+c.width =
+size;
 
-/* =========================================================
-   THREE.JS
-========================================================= */
+c.height =
+size;
 
-function initUniverse(){
+const x =
+c.getContext("2d");
 
-    try{
+const g =
+x.createRadialGradient(
+size/2,
+size/2,
+0,
+size/2,
+size/2,
+size*.48
+);
 
-        if(typeof THREE === "undefined"){
+stops.forEach(
+s=>{
+g.addColorStop(
+s[0],
+s[1]
+);
+}
+);
 
-            threeError.classList.add(
-                "show"
-            );
+x.fillStyle =
+g;
 
-            return false;
-        }
+x.fillRect(
+0,
+0,
+size,
+size
+);
 
-        renderer =
-            new THREE.WebGLRenderer({
+return new THREE.CanvasTexture(
+c
+);
 
-                canvas:canvas,
-
-                antialias:true,
-
-                alpha:false,
-
-                powerPreference:
-                    "high-performance"
-
-            });
-
-        renderer.setPixelRatio(
-            Math.min(
-                window.devicePixelRatio || 1,
-                1.25
-            )
-        );
-
-        renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
-        );
-
-        scene =
-            new THREE.Scene();
-
-        scene.background =
-            new THREE.Color(
-                0x020004
-            );
-
-        camera =
-            new THREE.PerspectiveCamera(
-                58,
-                window.innerWidth /
-                window.innerHeight,
-                0.1,
-                4000
-            );
-
-        camera.position.set(
-            0,
-            0,
-            360
-        );
-
-        scene.add(
-            new THREE.AmbientLight(
-                0xffffff,
-                0.35
-            )
-        );
-
-        const purpleLight =
-            new THREE.PointLight(
-                0xb45cff,
-                3.5,
-                1200
-            );
-
-        purpleLight.position.set(
-            120,
-            100,
-            250
-        );
-
-        scene.add(
-            purpleLight
-        );
-
-        galaxy =
-            new THREE.Group();
-
-        scene.add(
-            galaxy
-        );
-
-        createNebulaBackdrop();
-        createStars();
-        createGalaxyDust();
-        createHeart();
-        createRings();
-        createPhotos();
-        createSparkles();
-
-        renderer.render(
-            scene,
-            camera
-        );
-
-        animate();
-
-        return true;
-
-    }catch(err){
-
-        console.error(
-            "Error iniciando Three.js:",
-            err
-        );
-
-        threeError.classList.add(
-            "show"
-        );
-
-        return false;
-    }
 }
 
 
-/* =========================================================
-   ESTRELLAS
-========================================================= */
+function createBackdrop(){
 
-function makeRadialTexture(stops, size=1024){
+const g =
+new THREE.Group();
 
-    const c = document.createElement("canvas");
-    c.width = size;
-    c.height = size;
+let a =
+new THREE.Sprite(
+new THREE.SpriteMaterial({
 
-    const ctx = c.getContext("2d");
+map:
+radialTexture([
+[0,"rgba(255,205,255,.23)"],
+[.2,"rgba(218,63,255,.16)"],
+[.55,"rgba(70,12,130,.08)"],
+[1,"rgba(0,0,0,0)"]
+]),
 
-    const g = ctx.createRadialGradient(
-        size * 0.5,
-        size * 0.46,
-        size * 0.02,
-        size * 0.5,
-        size * 0.5,
-        size * 0.48
-    );
+transparent:true,
 
-    stops.forEach(function(stop){
-        g.addColorStop(stop[0], stop[1]);
-    });
+depthWrite:false,
 
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,size,size);
+blending:
+THREE.AdditiveBlending
 
-    return new THREE.CanvasTexture(c);
+})
+);
+
+a.scale.set(
+1500,
+980,
+1
+);
+
+a.position.z =
+-850;
+
+g.add(a);
+
+
+let b =
+new THREE.Sprite(
+new THREE.SpriteMaterial({
+
+map:
+radialTexture([
+[0,"rgba(255,70,240,.15)"],
+[.25,"rgba(190,55,255,.1)"],
+[1,"rgba(0,0,0,0)"]
+]),
+
+transparent:true,
+
+depthWrite:false,
+
+blending:
+THREE.AdditiveBlending
+
+})
+);
+
+b.scale.set(
+1100,
+700,
+1
+);
+
+b.position.set(
+-230,
+30,
+-650
+);
+
+b.rotation.z =
+-.35;
+
+g.add(b);
+
+scene.add(g);
+
 }
 
-function createNebulaBackdrop(){
-
-    const nebulaGroup = new THREE.Group();
-    nebulaGroup.name = "nebulaBackdrop";
-    scene.add(nebulaGroup);
-
-    const base = new THREE.Sprite(
-        new THREE.SpriteMaterial({
-            map: makeRadialTexture([
-                [0, "rgba(255,220,255,.25)"],
-                [.12, "rgba(224,71,255,.18)"],
-                [.30, "rgba(122,35,210,.12)"],
-                [.58, "rgba(47,13,84,.09)"],
-                [1, "rgba(2,0,8,0)"]
-            ]),
-            transparent:true,
-            depthWrite:false,
-            blending:THREE.AdditiveBlending,
-            opacity:.92
-        })
-    );
-
-    base.scale.set(1650, 1050, 1);
-    base.position.set(0, 0, -900);
-    nebulaGroup.add(base);
-
-    const magentaCloud = new THREE.Sprite(
-        new THREE.SpriteMaterial({
-            map: makeRadialTexture([
-                [0, "rgba(255,92,240,.18)"],
-                [.20, "rgba(233,75,255,.13)"],
-                [.48, "rgba(143,41,214,.07)"],
-                [1, "rgba(0,0,0,0)"]
-            ]),
-            transparent:true,
-            depthWrite:false,
-            blending:THREE.AdditiveBlending,
-            opacity:.95
-        })
-    );
-
-    magentaCloud.scale.set(1100, 700, 1);
-    magentaCloud.position.set(-220, 40, -620);
-    magentaCloud.rotation.z = -0.22;
-    nebulaGroup.add(magentaCloud);
-
-    const violetCloud = new THREE.Sprite(
-        new THREE.SpriteMaterial({
-            map: makeRadialTexture([
-                [0, "rgba(170,100,255,.17)"],
-                [.24, "rgba(114,63,245,.10)"],
-                [.55, "rgba(63,20,140,.06)"],
-                [1, "rgba(0,0,0,0)"]
-            ]),
-            transparent:true,
-            depthWrite:false,
-            blending:THREE.AdditiveBlending,
-            opacity:.9
-        })
-    );
-
-    violetCloud.scale.set(1350, 820, 1);
-    violetCloud.position.set(260, -80, -760);
-    violetCloud.rotation.z = 0.32;
-    nebulaGroup.add(violetCloud);
-
-    nebulaGroup.userData.clouds = [base, magentaCloud, violetCloud];
-}
 
 function createStars(){
 
-    const starGeometry = new THREE.BufferGeometry();
-    const STAR_COUNT = 1800;
+const n =
+2200;
 
-    const starPositions = new Float32Array(STAR_COUNT * 3);
+const p =
+new Float32Array(
+n*3
+);
 
-    for(let i=0;i<STAR_COUNT;i++){
+for(
+let i=0;
+i<n;
+i++
+){
 
-        const radius = 700 + Math.random() * 1650;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
+const r =
+650 +
+Math.random()*1800;
 
-        starPositions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
-        starPositions[i*3+1] = radius * Math.cos(phi);
-        starPositions[i*3+2] = radius * Math.sin(phi) * Math.sin(theta);
-    }
+const t =
+Math.random() *
+Math.PI*2;
 
-    starGeometry.setAttribute(
-        "position",
-        new THREE.BufferAttribute(starPositions,3)
-    );
+const u =
+Math.acos(
+2*Math.random()-1
+);
 
-    stars = new THREE.Points(
-        starGeometry,
-        new THREE.PointsMaterial({
-            color:0xffffff,
-            size:1.75,
-            transparent:true,
-            opacity:.78,
-            depthWrite:false,
-            blending:THREE.AdditiveBlending
-        })
-    );
+p[i*3] =
+r*Math.sin(u)*
+Math.cos(t);
 
-    scene.add(stars);
+p[i*3+1] =
+r*Math.cos(u);
+
+p[i*3+2] =
+r*Math.sin(u)*
+Math.sin(t);
+
 }
+
+const geo =
+new THREE.BufferGeometry();
+
+geo.setAttribute(
+"position",
+new THREE.BufferAttribute(
+p,
+3
+)
+);
+
+stars =
+new THREE.Points(
+geo,
+new THREE.PointsMaterial({
+
+color:0xffffff,
+
+size:1.6,
+
+transparent:true,
+
+opacity:.8,
+
+depthWrite:false,
+
+blending:
+THREE.AdditiveBlending
+
+})
+);
+
+scene.add(stars);
+
+}
+
 
 function createGalaxyDust(){
 
-    const COUNT = 2600;
-    const positions = new Float32Array(COUNT * 3);
-    const colors = new Float32Array(COUNT * 3);
-    const color = new THREE.Color();
+const n =
+6500;
 
-    for(let i=0;i<COUNT;i++){
+const p =
+new Float32Array(
+n*3
+);
 
-        const angle = Math.random() * Math.PI * 2;
-        const arm = Math.random();
-        const radius = 90 + Math.pow(arm, .72) * 390;
-        const spiral = angle + radius * 0.018 + (Math.random()-.5) * 0.48;
+const c =
+new Float32Array(
+n*3
+);
 
-        positions[i*3] =
-            Math.cos(spiral) * radius + (Math.random()-.5)*26;
+const col =
+new THREE.Color();
 
-        positions[i*3+1] =
-            (Math.random()-.5) * (22 + radius * 0.11);
+for(
+let i=0;
+i<n;
+i++
+){
 
-        positions[i*3+2] =
-            Math.sin(spiral) * radius + (Math.random()-.5)*26;
+const a =
+Math.random()*
+Math.PI*2;
 
-        const pick = Math.random();
+const r =
+55+
+Math.pow(
+Math.random(),
+.7
+)*420;
 
-        if(pick < .40){
-            color.setHSL(.86 + Math.random()*.05, .95, .68 + Math.random()*.20);
-        }else if(pick < .78){
-            color.setHSL(.74 + Math.random()*.08, .85, .62 + Math.random()*.20);
-        }else if(pick < .94){
-            color.setHSL(.93 + Math.random()*.04, .92, .74 + Math.random()*.18);
-        }else{
-            color.setHSL(.0, 0, .88 + Math.random()*.10);
-        }
+const arm =
+a+
+r*.021+
+(Math.random()-.5)*.55;
 
-        colors[i*3] = color.r;
-        colors[i*3+1] = color.g;
-        colors[i*3+2] = color.b;
-    }
+const spread =
+(Math.random()-.5)*
+(16+r*.12);
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions,3));
-    geometry.setAttribute("color", new THREE.BufferAttribute(colors,3));
+p[i*3] =
+Math.cos(arm)*
+r+
+spread;
 
-    const dust = new THREE.Points(
-        geometry,
-        new THREE.PointsMaterial({
-            size:1.8,
-            transparent:true,
-            opacity:.58,
-            depthWrite:false,
-            vertexColors:true,
-            blending:THREE.AdditiveBlending
-        })
-    );
+p[i*3+1] =
+(Math.random()-.5)*
+(26+r*.1);
 
-    dust.name = "galaxyDust";
-    galaxy.add(dust);
-    window.__galaxyDust = dust;
+p[i*3+2] =
+Math.sin(arm)*
+r+
+spread;
+
+const q =
+Math.random();
+
+col.setHSL(
+q<.5
+?.84+Math.random()*.05
+:q<.85
+?.75+Math.random()*.1
+:.92+Math.random()*.03,
+.88,
+.62+Math.random()*.24
+);
+
+c[i*3] =
+col.r;
+
+c[i*3+1] =
+col.g;
+
+c[i*3+2] =
+col.b;
+
 }
 
-/* =========================================================
-   TEXTURA CORAZÓN
-========================================================= */
+const geo =
+new THREE.BufferGeometry();
 
-function createHeartTexture(){
+geo.setAttribute(
+"position",
+new THREE.BufferAttribute(
+p,
+3
+)
+);
 
-    const c =
-        document.createElement(
-            "canvas"
-        );
+geo.setAttribute(
+"color",
+new THREE.BufferAttribute(
+c,
+3
+)
+);
 
-    c.width = 512;
-    c.height = 512;
+dust =
+new THREE.Points(
+geo,
+new THREE.PointsMaterial({
 
-    const ctx =
-        c.getContext("2d");
+size:1.7,
 
-    const gradient =
-        ctx.createRadialGradient(
-            256,
-            230,
-            20,
-            256,
-            256,
-            240
-        );
+transparent:true,
 
-    gradient.addColorStop(
-        0,
-        "rgba(255,210,255,1)"
-    );
+opacity:.68,
 
-    gradient.addColorStop(
-        0.22,
-        "rgba(220,80,255,1)"
-    );
+depthWrite:false,
 
-    gradient.addColorStop(
-        0.52,
-        "rgba(125,25,235,.95)"
-    );
+vertexColors:true,
 
-    gradient.addColorStop(
-        1,
-        "rgba(30,0,60,0)"
-    );
+blending:
+THREE.AdditiveBlending
 
-    ctx.fillStyle =
-        gradient;
+})
+);
 
-    ctx.fillRect(
-        0,
-        0,
-        512,
-        512
-    );
+galaxy.add(dust);
 
-    ctx.font =
-        "190px Arial";
-
-    ctx.textAlign =
-        "center";
-
-    ctx.textBaseline =
-        "middle";
-
-    ctx.shadowColor =
-        "#c026ff";
-
-    ctx.shadowBlur =
-        35;
-
-    ctx.fillStyle =
-        "#a855f7";
-
-    ctx.fillText(
-        "♥",
-        256,
-        260
-    );
-
-    return new THREE.CanvasTexture(c);
 }
 
 
-/* =========================================================
-   CORAZÓN
-========================================================= */
+function createCenterLights(){
+
+const core =
+new THREE.PointLight(
+0xe879ff,
+7,
+700
+);
+
+core.position.set(
+0,
+0,
+80
+);
+
+galaxy.add(core);
+
+
+const core2 =
+new THREE.PointLight(
+0x8b5cf6,
+4,
+900
+);
+
+core2.position.set(
+-80,
+50,
+180
+);
+
+galaxy.add(core2);
+
+}
+
 
 function createHeart(){
 
-    /*
-       El corazón 3D original se mantiene oculto para que las tarjetas
-       HTML puedan tener profundidad real delante/detrás del corazón.
-       El corazón visible se dibuja como SVG en la misma capa HTML.
-    */
+const overlay =
+document.createElement(
+"div"
+);
 
-    heart =
-        new THREE.Sprite(
-            new THREE.SpriteMaterial({
-                map:createHeartTexture(),
-                transparent:true,
-                opacity:0,
-                depthWrite:false,
-                depthTest:false
-            })
-        );
+overlay.id =
+"heartOverlay";
 
-    heart.visible = false;
-    heart.scale.set(200,200,1);
-    heart.position.set(0,0,0);
-    galaxy.add(heart);
+overlay.textContent =
+"♥";
 
-    const oldGlow =
-        document.getElementById('heartGlow3D');
+document.getElementById(
+"visualOverlay"
+).appendChild(
+overlay
+);
 
-    if(oldGlow){
-        oldGlow.remove();
-    }
 
-    glow = null;
+const aura =
+document.createElement(
+"div"
+);
 
-    /* CAPA COMPARTIDA: tarjetas + corazón */
+aura.id =
+"heartAura";
 
-    let visualOverlay =
-        document.getElementById('visualOverlay');
+document.getElementById(
+"visualOverlay"
+).appendChild(
+aura
+);
 
-    if(!visualOverlay){
-
-        visualOverlay =
-            document.createElement('div');
-
-        visualOverlay.id = 'visualOverlay';
-        visualOverlay.style.position = 'fixed';
-        visualOverlay.style.inset = '0';
-        visualOverlay.style.zIndex = '40';
-        visualOverlay.style.pointerEvents = 'none';
-        visualOverlay.style.overflow = 'visible';
-
-        document.body.appendChild(visualOverlay);
-    }
-
-    const aura =
-        document.createElement('div');
-
-    aura.id = 'heartAura';
-    aura.style.position = 'absolute';
-    aura.style.left = '50%';
-    aura.style.top = '50%';
-    aura.style.width = '290px';
-    aura.style.height = '290px';
-    aura.style.transform = 'translate(-50%,-50%)';
-    aura.style.borderRadius = '50%';
-    aura.style.background =
-        'radial-gradient(circle, rgba(255,225,255,.30) 0%, rgba(236,72,244,.40) 18%, rgba(192,38,211,.24) 36%, rgba(126,34,206,.12) 58%, transparent 78%)';
-    aura.style.filter = 'blur(10px)';
-    aura.style.pointerEvents = 'none';
-    aura.style.zIndex = '4490';
-    visualOverlay.appendChild(aura);
-
-    const heartElement =
-        document.createElement('div');
-
-    heartElement.id = 'heartOverlay';
-    heartElement.style.position = 'absolute';
-    heartElement.style.left = '50%';
-    heartElement.style.top = '50%';
-    heartElement.style.width = '150px';
-    heartElement.style.height = '150px';
-    heartElement.style.transform = 'translate(-50%,-50%) scale(1)';
-    heartElement.style.transformOrigin = 'center center';
-    heartElement.style.pointerEvents = 'none';
-    heartElement.style.zIndex = '4500';
-    heartElement.style.filter =
-        'drop-shadow(0 0 5px rgba(255,255,255,.95)) drop-shadow(0 0 14px rgba(245,208,254,.9)) drop-shadow(0 0 28px rgba(217,70,239,.95)) drop-shadow(0 0 52px rgba(139,92,246,.72))';
-    heartElement.style.willChange = 'transform';
-
-    heartElement.innerHTML = `
-<svg width="100%" height="100%" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs>
-        <linearGradient id="heartMainGradient" x1="90" y1="70" x2="420" y2="470" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#ffffff"/>
-            <stop offset="0.16" stop-color="#f5c2ff"/>
-            <stop offset="0.38" stop-color="#e879f9"/>
-            <stop offset="0.62" stop-color="#d946ef"/>
-            <stop offset="0.84" stop-color="#8b5cf6"/>
-            <stop offset="1" stop-color="#5b21b6"/>
-        </linearGradient>
-        <radialGradient id="heartCore" cx="50%" cy="34%" r="66%">
-            <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
-            <stop offset=".3" stop-color="#f0abfc" stop-opacity=".38"/>
-            <stop offset=".72" stop-color="#d946ef" stop-opacity=".08"/>
-            <stop offset="1" stop-color="#000000" stop-opacity="0"/>
-        </radialGradient>
-        <filter id="heartGlow" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur stdDeviation="13" result="blur"/>
-        </filter>
-        <filter id="heartGlowSoft" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="blur"/>
-        </filter>
-        <path id="heartPath" d="M256 452 C230 425 73 306 73 178 C73 105 126 60 190 60 C224 60 248 77 256 103 C264 77 288 60 322 60 C386 60 439 105 439 178 C439 306 282 425 256 452Z"/>
-    </defs>
-
-    <use href="#heartPath" fill="#d946ef" opacity=".52" filter="url(#heartGlow)"/>
-    <use href="#heartPath" fill="#c026d3" opacity=".5" filter="url(#heartGlowSoft)"/>
-    <use href="#heartPath" fill="url(#heartMainGradient)" stroke="#f8e7ff" stroke-width="5" stroke-linejoin="round"/>
-    <use href="#heartPath" fill="url(#heartCore)"/>
-
-    <path d="M156 126 C184 91 235 92 260 123 C228 111 196 119 170 151 C160 164 145 151 156 126Z" fill="#ffffff" opacity=".34"/>
-    <ellipse cx="184" cy="168" rx="26" ry="12" fill="#ffffff" opacity=".24" transform="rotate(-28 184 168)"/>
-
-    <circle cx="102" cy="86" r="4" fill="#ffffff" opacity=".95"/>
-    <circle cx="424" cy="132" r="3" fill="#ffffff" opacity=".9"/>
-    <circle cx="389" cy="75" r="2.5" fill="#f5d0fe" opacity=".95"/>
-    <circle cx="117" cy="260" r="2.5" fill="#ffffff" opacity=".9"/>
-
-</svg>`;
-
-    visualOverlay.appendChild(heartElement);
 }
 
-
-/* =========================================================
-   ÓRBITAS
-========================================================= */
-
-function createRings(){
-
-    /*
-       GALAXIA DE POLVO LUMINOSO
-       Sin líneas continuas ni tubos: los brazos están formados
-       casi por completo por pequeños puntos de luz amontonados,
-       como una galaxia real vista de lejos.
-    */
-
-    const arms = [];
-
-    const armColors = [
-        0xffe0ff,
-        0xf6b4ff,
-        0xe879f9,
-        0xd946ef,
-        0xc084fc,
-        0xa78bfa
-    ];
-
-    const ARM_COUNT = 6;
-    const POINTS_PER_ARM = 820;
-
-    for(let a = 0; a < ARM_COUNT; a++){
-
-        const positions = new Float32Array(POINTS_PER_ARM * 3);
-        const colors = new Float32Array(POINTS_PER_ARM * 3);
-        const sizes = new Float32Array(POINTS_PER_ARM);
-
-        const baseAngle =
-            (a / ARM_COUNT) * Math.PI * 2;
-
-        const baseColor =
-            new THREE.Color(armColors[a]);
-
-        for(let i = 0; i < POINTS_PER_ARM; i++){
-
-            const t = Math.random();
-
-            /* Más densidad cerca del centro y en las curvas */
-            const radius =
-                55 + Math.pow(t, 0.78) * 395;
-
-            const theta =
-                baseAngle +
-                t * Math.PI * 3.6;
-
-            /* Variación orgánica: no forma una línea limpia */
-            const spread =
-                5.5 + radius * 0.038;
-
-            const offsetX =
-                (Math.random() - 0.5) * spread;
-
-            const offsetZ =
-                (Math.random() - 0.5) * spread;
-
-            const x =
-                Math.cos(theta) * radius + offsetX;
-
-            const z =
-                Math.sin(theta) * radius + offsetZ;
-
-            const y =
-                Math.sin(theta * 1.8 + a) *
-                (4 + radius * 0.015) +
-                (Math.random() - 0.5) * (7 + radius * 0.028);
-
-            positions[i * 3] = x;
-            positions[i * 3 + 1] = y;
-            positions[i * 3 + 2] = z;
-
-            const variation =
-                0.72 + Math.random() * 0.28;
-
-            colors[i * 3] =
-                Math.min(1, baseColor.r * variation);
-
-            colors[i * 3 + 1] =
-                Math.min(1, baseColor.g * variation);
-
-            colors[i * 3 + 2] =
-                Math.min(1, baseColor.b * variation);
-
-            /* Puntos grandes = pequeñas zonas brillantes */
-            const chance = Math.random();
-
-            if(chance < 0.035){
-                sizes[i] = 5.0 + Math.random() * 4.0;
-            }else if(chance < 0.16){
-                sizes[i] = 2.7 + Math.random() * 2.0;
-            }else{
-                sizes[i] = 1.0 + Math.random() * 1.8;
-            }
-        }
-
-        const geometry =
-            new THREE.BufferGeometry();
-
-        geometry.setAttribute(
-            'position',
-            new THREE.BufferAttribute(positions, 3)
-        );
-
-        geometry.setAttribute(
-            'color',
-            new THREE.BufferAttribute(colors, 3)
-        );
-
-        geometry.setAttribute(
-            'size',
-            new THREE.BufferAttribute(sizes, 1)
-        );
-
-        /* Capa suave del brazo */
-        const soft =
-            new THREE.Points(
-                geometry,
-                new THREE.PointsMaterial({
-                    size: 3.8,
-                    transparent: true,
-                    opacity: 0.10,
-                    vertexColors: true,
-                    depthWrite: false,
-                    blending: THREE.AdditiveBlending
-                })
-            );
-
-        soft.userData.orbitSpeed =
-            (a % 2 === 0 ? 1 : -1) *
-            (0.00012 + a * 0.000006);
-
-        galaxy.add(soft);
-        arms.push(soft);
-
-        /* Núcleo denso del brazo */
-        const core =
-            new THREE.Points(
-                geometry,
-                new THREE.PointsMaterial({
-                    size: 1.8,
-                    transparent: true,
-                    opacity: 0.66,
-                    vertexColors: true,
-                    depthWrite: false,
-                    blending: THREE.AdditiveBlending
-                })
-            );
-
-        core.userData.orbitSpeed =
-            soft.userData.orbitSpeed;
-
-        galaxy.add(core);
-        arms.push(core);
-    }
-
-    /*
-       Núcleo de polvo: pequeñas luces muy juntas alrededor del corazón.
-       Ayuda a dar la apariencia compacta de la referencia.
-    */
-
-    const CORE_COUNT = 1500;
-    const corePositions = new Float32Array(CORE_COUNT * 3);
-    const coreColors = new Float32Array(CORE_COUNT * 3);
-
-    for(let i = 0; i < CORE_COUNT; i++){
-
-        const radius =
-            Math.pow(Math.random(), 1.7) * 145;
-
-        const angle =
-            Math.random() * Math.PI * 2;
-
-        const x =
-            Math.cos(angle) * radius;
-
-        const z =
-            Math.sin(angle) * radius;
-
-        const y =
-            (Math.random() - 0.5) *
-            (7 + radius * 0.08);
-
-        corePositions[i * 3] = x;
-        corePositions[i * 3 + 1] = y;
-        corePositions[i * 3 + 2] = z;
-
-        const c = new THREE.Color();
-
-        const p = Math.random();
-
-        if(p < 0.45){
-            c.setHex(0xffd8ff);
-        }else if(p < 0.82){
-            c.setHex(0xe879f9);
-        }else{
-            c.setHex(0xb388ff);
-        }
-
-        const k = 0.65 + Math.random() * 0.35;
-
-        coreColors[i * 3] = c.r * k;
-        coreColors[i * 3 + 1] = c.g * k;
-        coreColors[i * 3 + 2] = c.b * k;
-    }
-
-    const coreGeometry =
-        new THREE.BufferGeometry();
-
-    coreGeometry.setAttribute(
-        'position',
-        new THREE.BufferAttribute(corePositions, 3)
-    );
-
-    coreGeometry.setAttribute(
-        'color',
-        new THREE.BufferAttribute(coreColors, 3)
-    );
-
-    const coreDust =
-        new THREE.Points(
-            coreGeometry,
-            new THREE.PointsMaterial({
-                size: 1.6,
-                transparent: true,
-                opacity: 0.58,
-                vertexColors: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending
-            })
-        );
-
-    coreDust.userData.orbitSpeed = 0.00016;
-    galaxy.add(coreDust);
-    arms.push(coreDust);
-
-    /* Referencias seguras para la animación existente */
-    ring = arms[0] || null;
-    ring2 = arms[1] || null;
-    ring3 = arms[2] || null;
-
-    window.__allRings = arms;
-}
-
-/* =========================================================
-   FRASES
-========================================================= */
-
-const phrases = [
-
-    "Flores moradas 💜",
-    "Un pequeño detalle 🌸",
-    "Momentos bonitos ✨",
-    "Para alguien especial 💜",
-    "Que nunca falte magia 🌷",
-    "Un recuerdo para ti 🌙",
-    "Tu sonrisa ilumina ✨",
-    "Pequeñas cosas, grandes recuerdos 💜",
-    "Un lugar solo para ti 🌸",
-    "Siempre hay algo bonito",
-    "Un universo de recuerdos ✨",
-    "Flores que hablan por sí solas 💜",
-    "Aquí comienza algo bonito 🌷",
-    "Un poquito de magia para ti",
-    "Qué bonito coincidir contigo 💜"
-
-];
-
-const textColors = [
-
-    "#c084fc",
-    "#e879f9",
-    "#a855f7",
-    "#d8b4fe",
-    "#f0abfc"
-
-];
-
-function makeTextTexture(
-    text,
-    glowColor
-){
-
-    const c =
-        document.createElement(
-            "canvas"
-        );
-
-    c.width = 700;
-    c.height = 130;
-
-    const ctx =
-        c.getContext("2d");
-
-    ctx.clearRect(
-        0,
-        0,
-        c.width,
-        c.height
-    );
-
-    ctx.textAlign =
-        "center";
-
-    ctx.textBaseline =
-        "middle";
-
-    let fontSize = 43;
-
-    ctx.font =
-        "bold " +
-        fontSize +
-        "px Arial";
-
-    while(
-        ctx.measureText(text).width > 620 &&
-        fontSize > 22
-    ){
-
-        fontSize -= 2;
-
-        ctx.font =
-            "bold " +
-            fontSize +
-            "px Arial";
-    }
-
-    ctx.fillStyle =
-        "#ffffff";
-
-    ctx.shadowColor =
-        glowColor;
-
-    ctx.shadowBlur =
-        25;
-
-    ctx.fillText(
-        text,
-        c.width/2,
-        c.height/2
-    );
-
-    return new THREE.CanvasTexture(c);
-}
-
-function createPhrases(){
-
-    textGroup =
-        new THREE.Group();
-
-    galaxy.add(
-        textGroup
-    );
-
-    for(
-        let i=0;
-        i<12;
-        i++
-    ){
-
-        const text =
-            phrases[
-                i % phrases.length
-            ];
-
-        const texture =
-            makeTextTexture(
-                text,
-                textColors[
-                    i % textColors.length
-                ]
-            );
-
-        const sprite =
-            new THREE.Sprite(
-
-                new THREE.SpriteMaterial({
-
-                    map:texture,
-
-                    transparent:true,
-
-                    depthWrite:false
-
-                })
-
-            );
-
-        const angle =
-            (i / 18) *
-            Math.PI * 2;
-
-        const radius =
-            i % 2 === 0
-            ? 270
-    : 320;
-
-        sprite.position.set(
-
-            Math.cos(angle) *
-            radius,
-
-            Math.sin(angle * 2) *
-            35,
-
-            Math.sin(angle) *
-            radius
-
-        );
-
-        sprite.scale.set(
-            105,
-            22,
-            1
-        );
-
-        sprite.userData = {
-
-            angle:angle,
-
-            radius:radius,
-
-            speed:
-                0.12 +
-                Math.random()*0.04,
-
-            baseY:
-                sprite.position.y
-
-        };
-
-        textGroup.add(
-            sprite
-        );
-    }
-}
-
-
-/* =========================================================
-   PLACEHOLDER
-========================================================= */
-
-function createPlaceholderTexture(){
-
-    const c =
-        document.createElement(
-            "canvas"
-        );
-
-    c.width = 512;
-    c.height = 512;
-
-    const ctx =
-        c.getContext("2d");
-
-    const gradient =
-        ctx.createLinearGradient(
-            0,
-            0,
-            512,
-            512
-        );
-
-    gradient.addColorStop(
-        0,
-        "#351052"
-    );
-
-    gradient.addColorStop(
-        0.5,
-        "#8b2be2"
-    );
-
-    gradient.addColorStop(
-        1,
-        "#240633"
-    );
-
-    ctx.fillStyle =
-        gradient;
-
-    ctx.fillRect(
-        0,
-        0,
-        512,
-        512
-    );
-
-    ctx.strokeStyle =
-        "rgba(255,200,255,.7)";
-
-    ctx.lineWidth = 8;
-
-    if(ctx.roundRect){
-
-        ctx.beginPath();
-
-        ctx.roundRect(
-            30,
-            30,
-            452,
-            452,
-            45
-        );
-
-        ctx.stroke();
-    }
-
-    ctx.font =
-        "115px Arial";
-
-    ctx.textAlign =
-        "center";
-
-    ctx.textBaseline =
-        "middle";
-
-    ctx.shadowColor =
-        "#ff9cff";
-
-    ctx.shadowBlur =
-        25;
-
-    ctx.fillStyle =
-        "#ffffff";
-
-    ctx.fillText(
-        "🌸",
-        256,
-        215
-    );
-
-    ctx.font =
-        "bold 28px Arial";
-
-    ctx.shadowBlur =
-        15;
-
-    ctx.fillText(
-        "Cargando...",
-        256,
-        355
-    );
-
-    return new THREE.CanvasTexture(c);
-}
-
-
-/* =========================================================
-   FOTOS
-========================================================= */
-function createPhoto(data){
-
-    /*
-       ANCLA 3D DE LA FOTO.
-       La imagen visible será un elemento HTML sobre el canvas.
-       Así funciona correctamente con archivos locales .jpg/.jpeg.
-    */
-
-    const anchor = new THREE.Object3D();
-
-    anchor.userData = {
-        data:data
-    };
-
-    return anchor;
-}
-/* =========================================================
-   CREAR FOTOS
-========================================================= */
 
 function createPhotos(){
 
-    photoGroup = new THREE.Group();
-    galaxy.add(photoGroup);
+photoGroup =
+new THREE.Group();
 
-    let photoOverlay =
-        document.getElementById("visualOverlay");
+galaxy.add(
+photoGroup
+);
 
-    if(!photoOverlay){
-        photoOverlay =
-            document.createElement("div");
+const overlay =
+document.getElementById(
+"visualOverlay"
+);
 
-        photoOverlay.id = "visualOverlay";
-        photoOverlay.style.position = "fixed";
-        photoOverlay.style.inset = "0";
-        photoOverlay.style.zIndex = "40";
-        photoOverlay.style.pointerEvents = "none";
-        photoOverlay.style.overflow = "visible";
 
-        document.body.appendChild(photoOverlay);
-    }
+CONFIG.fotos.forEach(
+(data,i)=>{
 
-    /* Elimina solo tarjetas anteriores; conserva el corazón. */
-    Array.from(photoOverlay.children).forEach(function(child){
-        if(child.id !== "heartAura" && child.id !== "heartOverlay"){
-            child.remove();
-        }
-    });
+const angle =
+i/
+CONFIG.fotos.length*
+Math.PI*2;
 
-    const PHOTO_COUNT = CONFIG.fotos.length;
+const radius =
+210+
+(i%2)*25;
 
-    for(let i = 0; i < PHOTO_COUNT; i++){
+const anchor =
+new THREE.Object3D();
 
-        const data = CONFIG.fotos[i];
+anchor.position.set(
+Math.cos(angle)*radius,
+Math.sin(angle)*22,
+Math.sin(angle)*radius
+);
 
-        const anchor = createPhoto(data);
+anchor.userData = {
 
-        const angle =
-            (i / PHOTO_COUNT) * Math.PI * 2;
+angle,
+radius,
+baseY:anchor.position.y,
+speed:.16+
+Math.random()*.05
 
-        const radius =
-            185 + (i % 2) * 38;
+};
 
-        anchor.position.set(
-            Math.cos(angle) * radius,
-            Math.sin(angle) * 18,
-            Math.sin(angle) * radius
-        );
+photoGroup.add(
+anchor
+);
 
-        anchor.userData.angle = angle;
-        anchor.userData.radius = radius;
-        anchor.userData.baseY = anchor.position.y;
-        anchor.userData.speed =
-            0.18 + Math.random() * 0.05;
 
-        photoGroup.add(anchor);
+const card =
+document.createElement(
+"div"
+);
 
-        /* TARJETA HTML */
+card.className =
+"photo-card";
 
-        const card =
-            document.createElement("div");
 
-        card.style.position = "absolute";
-        card.style.left = "0";
-        card.style.top = "0";
-        card.style.width = "145px";
-        card.style.padding = "7px";
-        card.style.borderRadius = "17px";
-        card.style.background =
-            "linear-gradient(145deg, rgba(48,10,68,.96), rgba(18,2,28,.96))";
-        card.style.border =
-            "1px solid rgba(225,180,255,.65)";
-        card.style.boxShadow =
-            "0 0 24px rgba(168,85,247,.30)";
-        card.style.pointerEvents = "auto";
-        card.style.cursor = "pointer";
-        card.style.transformOrigin = "center center";
-        card.style.userSelect = "none";
-        card.style.willChange = "transform";
+const img =
+document.createElement(
+"img"
+);
 
-        const img =
-            document.createElement("img");
+img.src =
+data.imagen;
 
-        img.src = data.imagen;
-        img.alt = data.titulo;
-        img.draggable = false;
+img.alt =
+data.titulo;
 
-        img.style.display = "block";
-        img.style.width = "100%";
-        img.style.height = "105px";
-        img.style.objectFit = "cover";
-        img.style.borderRadius = "12px";
-        img.style.border =
-            "1px solid rgba(255,255,255,.25)";
-        img.style.background = "#1b0627";
+img.draggable =
+false;
 
-        img.onerror = function(){
-            img.style.display = "none";
-            fallback.textContent = "🌸";
-        };
 
-        const fallback =
-            document.createElement("div");
+const label =
+document.createElement(
+"div"
+);
 
-        fallback.textContent = "";
-        fallback.style.height = "105px";
-        fallback.style.display = "flex";
-        fallback.style.alignItems = "center";
-        fallback.style.justifyContent = "center";
-        fallback.style.fontSize = "45px";
-        fallback.style.borderRadius = "12px";
-        fallback.style.background =
-            "linear-gradient(135deg,#351052,#8b2be2,#240633)";
+label.className =
+"photo-title";
 
-        const title =
-            document.createElement("div");
+label.textContent =
+data.titulo;
 
-        title.textContent = data.titulo;
-        title.style.marginTop = "7px";
-        title.style.padding = "0 4px 3px";
-        title.style.textAlign = "center";
-        title.style.color = "#f4ddff";
-        title.style.font = "bold 12px Arial, sans-serif";
-        title.style.lineHeight = "1.25";
-        title.style.textShadow = "0 0 8px rgba(192,132,252,.7)";
 
-        card.appendChild(img);
-        card.appendChild(fallback);
-        card.appendChild(title);
+card.append(
+img,
+label
+);
 
-        fallback.style.display = "none";
 
-        card.addEventListener("pointerdown", function(e){
-            e.stopPropagation();
-        });
-
-        card.addEventListener("click", function(e){
-            e.preventDefault();
-            e.stopPropagation();
-
-            modalTitle.textContent = data.titulo;
-            modalText.textContent = data.texto;
-            modalImage.src = data.imagen;
-            photoModal.classList.add("show");
-        });
-
-        photoOverlay.appendChild(card);
-
-        anchor.userData.card = card;
-    }
+card.addEventListener(
+"pointerdown",
+e=>{
+e.stopPropagation();
 }
-/* =========================================================
-   DESTELLOS
-========================================================= */
+);
+
+
+card.addEventListener(
+"click",
+e=>{
+
+e.stopPropagation();
+
+modalTitle.textContent =
+data.titulo;
+
+modalText.textContent =
+data.texto;
+
+modalImage.src =
+data.imagen;
+
+photoModal.classList.add(
+"show"
+);
+
+}
+);
+
+
+overlay.appendChild(
+card
+);
+
+anchor.userData.card =
+card;
+
+}
+);
+
+}
+
 
 function createSparkles(){
 
-    sparkleGroup =
-        new THREE.Group();
+sparkleGroup =
+new THREE.Group();
 
-    galaxy.add(
-        sparkleGroup
-    );
+galaxy.add(
+sparkleGroup
+);
 
-    for(
-        let i=0;
-        i<24;
-        i++
-    ){
 
-        const geometry =
-            new THREE.SphereGeometry(
-                0.7,
-                6,
-                6
-            );
+for(
+let i=0;
+i<35;
+i++
+){
 
-        const material =
-            new THREE.MeshBasicMaterial({
+const m =
+new THREE.MeshBasicMaterial({
 
-                color:0xf5d0fe,
+color:0xf5d0fe,
 
-                transparent:true,
+transparent:true,
 
-                opacity:0.8
+opacity:
+.5+
+Math.random()*.4
 
-            });
+});
 
-        const sparkle =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
+const s =
+new THREE.Mesh(
 
-        const angle =
-            Math.random() *
-            Math.PI * 2;
+new THREE.SphereGeometry(
+.8+
+Math.random()*.8,
+6,
+6
+),
 
-        const radius =
-            110 +
-            Math.random()*180;
+m
 
-        sparkle.position.set(
+);
 
-            Math.cos(angle) *
-            radius,
+const a =
+Math.random()*
+Math.PI*2;
 
-            (Math.random()-0.5) *
-            120,
+const r =
+120+
+Math.random()*260;
 
-            Math.sin(angle) *
-            radius
+s.position.set(
 
-        );
+Math.cos(a)*r,
 
-        sparkle.userData = {
+(Math.random()-.5)*120,
 
-            offset:
-                Math.random() *
-                Math.PI *
-                2
+Math.sin(a)*r
 
-        };
+);
 
-        sparkleGroup.add(
-            sparkle
-        );
-    }
+s.userData.off =
+Math.random()*
+Math.PI*2;
+
+sparkleGroup.add(s);
+
 }
-
-
-/* =========================================================
-   RAYCASTER
-========================================================= */
-
-const raycaster =
-    new THREE.Raycaster();
-
-const mouse =
-    new THREE.Vector2();
-
-window.addEventListener(
-    "click",
-    function(e){
-
-        if(e.target !== canvas){
-            return;
-        }
-
-        if(!initialized){
-            return;
-        }
-
-        mouse.x =
-            (e.clientX /
-            window.innerWidth) *
-            2 - 1;
-
-        mouse.y =
-            -(e.clientY /
-            window.innerHeight) *
-            2 + 1;
-
-        raycaster.setFromCamera(
-            mouse,
-            camera
-        );
-
-        const objects =
-            raycaster.intersectObjects(
-                photoGroup.children
-            );
-
-        if(objects.length === 0){
-            return;
-        }
-
-        const object =
-            objects[0].object;
-
-        const data =
-            object.userData.data;
-
-        modalTitle.textContent =
-            data.titulo;
-
-        modalText.textContent =
-            data.texto;
-
-        modalImage.src =
-            data.imagen;
-
-        modalImage.onerror =
-            function(){
-
-                modalImage.src =
-                    createModalPlaceholder();
-
-            };
-
-        photoModal.classList.add(
-            "show"
-        );
-    }
-);
-
-
-/* =========================================================
-   PLACEHOLDER MODAL
-========================================================= */
-
-function createModalPlaceholder(){
-
-    const svg = `
-<svg xmlns="http://www.w3.org/2000/svg"
-width="800"
-height="500"
-viewBox="0 0 800 500">
-
-<defs>
-
-<linearGradient
-id="g"
-x1="0"
-y1="0"
-x2="1"
-y2="1">
-
-<stop
-offset="0%"
-stop-color="#32104d"/>
-
-<stop
-offset="50%"
-stop-color="#9b35e8"/>
-
-<stop
-offset="100%"
-stop-color="#22052f"/>
-
-</linearGradient>
-
-</defs>
-
-<rect
-width="800"
-height="500"
-rx="35"
-fill="url(#g)"/>
-
-<text
-x="400"
-y="240"
-text-anchor="middle"
-font-size="110">
-🌸
-</text>
-
-<text
-x="400"
-y="355"
-text-anchor="middle"
-fill="white"
-font-family="Arial"
-font-size="30">
-Tu imagen aparecerá aquí
-</text>
-
-</svg>
-`;
-
-    return "data:image/svg+xml;charset=utf-8," +
-        encodeURIComponent(svg);
-}
-
-
-/* =========================================================
-   CERRAR FOTO
-========================================================= */
-
-photoClose.addEventListener(
-    "click",
-    function(){
-
-        photoModal.classList.remove(
-            "show"
-        );
-
-    }
-);
-
-photoModal.addEventListener(
-    "click",
-    function(e){
-
-        if(e.target === photoModal){
-
-            photoModal.classList.remove(
-                "show"
-            );
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   CARTA
-========================================================= */
-
-letterButton.addEventListener(
-    "click",
-    function(){
-
-        letterModal.classList.add(
-            "show"
-        );
-
-    }
-);
-
-letterClose.addEventListener(
-    "click",
-    function(){
-
-        letterModal.classList.remove(
-            "show"
-        );
-
-    }
-);
-
-letterModal.addEventListener(
-    "click",
-    function(e){
-
-        if(e.target === letterModal){
-
-            letterModal.classList.remove(
-                "show"
-            );
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   CÁMARA
-========================================================= */
-
-let dragging = false;
-
-let previousX = 0;
-let previousY = 0;
-
-let targetRotationY = 0;
-let currentRotationY = 0;
-
-let targetRotationX = 0.05;
-let currentRotationX = 0.05;
-
-let targetZoom = 420;
-
-
-canvas.addEventListener(
-    "pointerdown",
-    function(e){
-
-        dragging = true;
-
-        previousX =
-            e.clientX;
-
-        previousY =
-            e.clientY;
-
-        canvas.setPointerCapture(
-            e.pointerId
-        );
-
-    }
-);
-
-
-canvas.addEventListener(
-    "pointermove",
-    function(e){
-
-        if(!dragging){
-            return;
-        }
-
-        const dx =
-            e.clientX -
-            previousX;
-
-        const dy =
-            e.clientY -
-            previousY;
-
-        targetRotationY +=
-            dx * 0.003;
-
-        targetRotationX +=
-            dy * 0.001;
-
-        targetRotationX =
-            Math.max(
-                -0.28,
-                Math.min(
-                    0.28,
-                    targetRotationX
-                )
-            );
-
-        previousX =
-            e.clientX;
-
-        previousY =
-            e.clientY;
-
-    }
-);
-
-
-function stopDragging(){
-
-    dragging = false;
 
 }
 
 
-canvas.addEventListener(
-    "pointerup",
-    stopDragging
-);
+function initUniverse(){
 
-canvas.addEventListener(
-    "pointercancel",
-    stopDragging
-);
+try{
 
-canvas.addEventListener(
-    "pointerleave",
-    stopDragging
-);
+if(
+typeof THREE ===
+"undefined"
+){
 
+threeError.style.display =
+"flex";
 
-/* =========================================================
-   ZOOM
-========================================================= */
+return false;
 
-canvas.addEventListener(
-    "wheel",
-    function(e){
-
-        e.preventDefault();
-
-        targetZoom +=
-            e.deltaY * 0.45;
-
-        targetZoom =
-            Math.max(
-                250,
-                Math.min(
-                    700,
-                    targetZoom
-                )
-            );
-
-    },
-    {
-        passive:false
-    }
-);
-
-
-/* =========================================================
-   ANIMACIÓN
-========================================================= */
-
-const tempWorldPosition = new THREE.Vector3();
-const heartWorldPosition = new THREE.Vector3(0,0,0);
-
-function projectedWorld(object){
-    object.getWorldPosition(tempWorldPosition);
-    return tempWorldPosition;
 }
 
-const clock =
-    new THREE.Clock();
+
+renderer =
+new THREE.WebGLRenderer({
+
+canvas,
+
+antialias:true,
+
+alpha:false,
+
+powerPreference:
+"high-performance"
+
+});
+
+
+renderer.setPixelRatio(
+Math.min(
+devicePixelRatio||1,
+1.35
+)
+);
+
+
+renderer.setSize(
+innerWidth,
+innerHeight
+);
+
+
+scene =
+new THREE.Scene();
+
+
+scene.background =
+new THREE.Color(
+0x020004
+);
+
+
+camera =
+new THREE.PerspectiveCamera(
+58,
+innerWidth/innerHeight,
+.1,
+4000
+);
+
+
+camera.position.set(
+0,
+0,
+420
+);
+
+
+scene.add(
+new THREE.AmbientLight(
+0xffffff,
+.35
+)
+);
+
+
+galaxy =
+new THREE.Group();
+
+scene.add(
+galaxy
+);
+
+
+createBackdrop();
+
+createStars();
+
+createGalaxyDust();
+
+createCenterLights();
+
+createHeart();
+
+createPhotos();
+
+createSparkles();
+
+
+renderer.render(
+scene,
+camera
+);
+
+
+animate();
+
+return true;
+
+}
+catch(e){
+
+console.error(e);
+
+threeError.style.display =
+"flex";
+
+return false;
+
+}
+
+}
+
+
+let entering =
+false;
+
+
+enterUniverse.addEventListener(
+"click",
+()=>{
+
+if(entering)
+return;
+
+entering =
+true;
+
+if(!initialized){
+
+if(!initUniverse()){
+
+entering =
+false;
+
+return;
+
+}
+
+initialized =
+true;
+
+}
+
+canvas.classList.add(
+"visible"
+);
+
+welcome.classList.remove(
+"show"
+);
+
+
+setTimeout(
+()=>{
+
+title.classList.add(
+"visible"
+);
+
+hint.classList.add(
+"visible"
+);
+
+letterButton.classList.add(
+"visible"
+);
+
+entering =
+false;
+
+},
+500
+);
+
+}
+);
+
+
+canvas.addEventListener(
+"pointerdown",
+e=>{
+
+dragging =
+true;
+
+prevX =
+e.clientX;
+
+prevY =
+e.clientY;
+
+canvas.setPointerCapture(
+e.pointerId
+);
+
+}
+);
+
+
+canvas.addEventListener(
+"pointermove",
+e=>{
+
+if(!dragging)
+return;
+
+targetY +=
+(e.clientX-prevX)*
+.003;
+
+targetX =
+Math.max(
+-.25,
+Math.min(
+.25,
+targetX+
+(e.clientY-prevY)*
+.001
+)
+);
+
+prevX =
+e.clientX;
+
+prevY =
+e.clientY;
+
+}
+);
+
+
+[
+"pointerup",
+"pointercancel",
+"pointerleave"
+].forEach(
+n=>
+canvas.addEventListener(
+n,
+()=>dragging=false
+)
+);
+
+
+canvas.addEventListener(
+"wheel",
+e=>{
+
+e.preventDefault();
+
+targetZoom =
+Math.max(
+280,
+Math.min(
+700,
+targetZoom+
+e.deltaY*.45
+)
+);
+
+},
+{
+passive:false
+}
+);
+
 
 function animate(){
 
-    requestAnimationFrame(
-        animate
-    );
+requestAnimationFrame(
+animate
+);
 
-    if(
-        !renderer ||
-        !scene ||
-        !camera
-    ){
-        return;
-    }
 
-    const time =
-        clock.getElapsedTime();
+if(!renderer)
+return;
 
-    if(!dragging){
 
-        targetRotationY +=
-            0.00035;
+const t =
+performance.now()*
+.001;
 
-    }
 
-    currentRotationY +=
-        (
-            targetRotationY -
-            currentRotationY
-        ) * 0.035;
+if(!dragging)
+targetY +=
+.00035;
 
-    currentRotationX +=
-        (
-            targetRotationX -
-            currentRotationX
-        ) * 0.035;
 
-    galaxy.rotation.y =
-        currentRotationY;
+currentY +=
+(targetY-currentY)*
+.035;
 
-    galaxy.rotation.x =
-        currentRotationX;
 
-    camera.position.z +=
-        (
-            targetZoom -
-            camera.position.z
-        ) * 0.06;
+currentX +=
+(targetX-currentX)*
+.035;
 
-    (window.__allRings || []).forEach(function(orbit){
 
-        const speed =
-            orbit.userData.orbitSpeed || 0.00025;
+galaxy.rotation.y =
+currentY;
 
-        orbit.rotation.z += speed;
+galaxy.rotation.x =
+currentX;
 
-        if(orbit.userData.glow){
-            orbit.userData.glow.rotation.z += speed * 0.84;
-        }
-    });
 
-    if(window.__orbitDust){
-        window.__orbitDust.rotation.z += 0.00018;
-        window.__orbitDust.rotation.y -= 0.00006;
-    }
+camera.position.z +=
+(targetZoom-camera.position.z)*
+.06;
 
-    if(window.__galaxyDust){
-        window.__galaxyDust.rotation.y += 0.00012;
-        window.__galaxyDust.rotation.z -= 0.000035;
-    }
 
-    const pulse =
-        1 +
-        Math.sin(time * 1.7) *
-        0.035;
+dust.rotation.y +=
+.00012;
 
-    heart.scale.set(
-        175 * pulse,
-        175 * pulse,
-        1
-    );
+dust.rotation.z -=
+.000035;
 
-    const glowPulse =
-        1 +
-        Math.sin(time * 1.4) *
-        0.04;
+stars.rotation.y +=
+.00002;
 
-    if(glow){
-        glow.scale.set(
-            280 * glowPulse,
-            280 * glowPulse,
-            1
-        );
-    }
 
-    stars.rotation.y +=
-        0.000025;
+const pulse =
+1+
+Math.sin(t*1.7)*
+.035;
 
-    /* CORAZÓN CENTRAL: pulso + profundidad real */
 
-    const heartOverlay =
-        document.getElementById("heartOverlay");
+const heart =
+document.getElementById(
+"heartOverlay"
+);
 
-    const heartAura =
-        document.getElementById("heartAura");
+const aura =
+document.getElementById(
+"heartAura"
+);
 
-    const heartPulse =
-        1 +
-        Math.sin(time * 2.2) *
-        0.045;
 
-    if(heartOverlay){
+heart.style.transform =
+`translate(-50%,-50%) scale(${pulse})`;
 
-        heartOverlay.style.transform =
-            `translate(-50%,-50%) scale(${heartPulse})`;
 
-        const heartDistance =
-            camera.position.distanceTo(
-                heartWorldPosition
-            );
+aura.style.transform =
+`translate(-50%,-50%) scale(${1+Math.sin(t*1.5)*.05})`;
 
-        heartOverlay.style.zIndex =
-            String(5000 - Math.floor(heartDistance));
-    }
 
-    if(heartAura){
+const heartDist =
+camera.position.length();
 
-        const auraPulse =
-            1 +
-            Math.sin(time * 1.8 + 0.7) *
-            0.06;
 
-        heartAura.style.transform =
-            `translate(-50%,-50%) scale(${auraPulse})`;
+heart.style.zIndex =
+String(
+5550-
+Math.floor(
+heartDist
+)
+);
 
-        const auraDistance =
-            camera.position.distanceTo(
-                heartWorldPosition
-            );
 
-        heartAura.style.zIndex =
-            String(4998 - Math.floor(auraDistance));
-    }
+aura.style.zIndex =
+String(
+5548-
+Math.floor(
+heartDist
+)
+);
 
-    /* Las frases flotantes ya no se usan. */
 
-    if(photoGroup){
+const projected =
+new THREE.Vector3();
 
-        const projected = new THREE.Vector3();
 
-        photoGroup.children.forEach(
-            function(anchor){
+photoGroup.children.forEach(
+a=>{
 
-                const data = anchor.userData;
+const d =
+a.userData;
 
-                data.angle +=
-                    data.speed * 0.001;
 
-                anchor.position.x =
-                    Math.cos(data.angle) *
-                    data.radius;
+d.angle +=
+d.speed*
+.001;
 
-                anchor.position.z =
-                    Math.sin(data.angle) *
-                    data.radius;
 
-                anchor.position.y =
-                    data.baseY +
-                    Math.sin(
-                        time * 0.8 +
-                        data.angle
-                    ) * 3;
+a.position.x =
+Math.cos(d.angle)*
+d.radius;
 
-                const card = data.card;
+a.position.z =
+Math.sin(d.angle)*
+d.radius;
 
-                if(!card){
-                    return;
-                }
+a.position.y =
+d.baseY+
+Math.sin(
+t*.8+
+d.angle
+)*
+3;
 
-                anchor.getWorldPosition(projected);
-                projected.project(camera);
 
-                const visible =
-                    projected.z >= -1 &&
-                    projected.z <= 1 &&
-                    projected.x >= -1.2 &&
-                    projected.x <= 1.2 &&
-                    projected.y >= -1.2 &&
-                    projected.y <= 1.2;
+const card =
+d.card;
 
-                if(!visible){
-                    card.style.display = "none";
-                    return;
-                }
 
-                const x =
-                    (projected.x * 0.5 + 0.5) *
-                    window.innerWidth;
+a.getWorldPosition(
+projected
+);
 
-                const y =
-                    (-projected.y * 0.5 + 0.5) *
-                    window.innerHeight;
+projected.project(
+camera
+);
 
-                const distance =
-                    camera.position.distanceTo(projectedWorld(anchor));
 
-                const scale =
-                    Math.max(
-                        0.62,
-                        Math.min(1.15, 420 / distance)
-                    );
+if(
+projected.z < -1 ||
+projected.z > 1 ||
+projected.x < -1.3 ||
+projected.x > 1.3 ||
+projected.y < -1.3 ||
+projected.y > 1.3
+){
 
-                card.style.display = "block";
-                card.style.transform =
-                    `translate(${x - 72.5}px, ${y - 62}px) scale(${scale})`;
-                card.style.zIndex =
-                    String(5000 - Math.floor(distance));
-            }
-        );
-    }
+card.style.display =
+"none";
 
-    sparkleGroup.children.forEach(
-        function(sparkle){
+return;
 
-            sparkle.material.opacity =
-                0.3 +
-                (
-                    Math.sin(
-                        time * 1.7 +
-                        sparkle.userData.offset
-                    ) + 1
-                ) * 0.3;
-
-        }
-    );
-
-    renderer.render(
-        scene,
-        camera
-    );
 }
 
 
-/* =========================================================
-   RESIZE
-========================================================= */
+const x =
+(projected.x*.5+.5)*
+innerWidth;
 
-window.addEventListener(
-    "resize",
-    function(){
+const y =
+(-projected.y*.5+.5)*
+innerHeight;
 
-        if(!camera || !renderer){
-            return;
-        }
 
-        camera.aspect =
-            window.innerWidth /
-            window.innerHeight;
+const dist =
+camera.position.distanceTo(
+projected
+);
 
-        camera.updateProjectionMatrix();
 
-        renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
-        );
+const scale =
+Math.max(
+.65,
+Math.min(
+1.12,
+430/dist
+)
+);
 
-        renderer.setPixelRatio(
-            Math.min(
-                window.devicePixelRatio || 1,
-                1.25
-            )
-        );
 
-    }
+card.style.display =
+"block";
+
+
+card.style.transform =
+`translate(${x-72.5}px,${y-62}px) scale(${scale})`;
+
+
+card.style.zIndex =
+String(
+5550-
+Math.floor(
+dist
+)
+);
+
+}
+);
+
+
+sparkleGroup.children.forEach(
+s=>
+s.material.opacity =
+.3+
+(
+Math.sin(
+t*1.7+
+s.userData.off
+)+1
+)*.3
+);
+
+
+renderer.render(
+scene,
+camera
+);
+
+}
+
+
+photoClose.addEventListener(
+"click",
+()=>
+photoModal.classList.remove(
+"show"
+)
+);
+
+
+photoModal.addEventListener(
+"click",
+e=>{
+
+if(
+e.target===
+photoModal
+){
+
+photoModal.classList.remove(
+"show"
+);
+
+}
+
+}
+);
+
+
+letterButton.addEventListener(
+"click",
+()=>
+letterModal.classList.add(
+"show"
+)
+);
+
+
+letterClose.addEventListener(
+"click",
+()=>
+letterModal.classList.remove(
+"show"
+)
+);
+
+
+letterModal.addEventListener(
+"click",
+e=>{
+
+if(
+e.target===
+letterModal
+){
+
+letterModal.classList.remove(
+"show"
+);
+
+}
+
+}
+);
+
+
+addEventListener(
+"resize",
+()=>{
+
+if(
+!camera ||
+!renderer
+)
+return;
+
+
+camera.aspect =
+innerWidth/
+innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(
+innerWidth,
+innerHeight
+);
+
+renderer.setPixelRatio(
+Math.min(
+devicePixelRatio||1,
+1.35
+)
+);
+
+}
 );
 
 </script>
